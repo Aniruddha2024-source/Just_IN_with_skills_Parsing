@@ -9,7 +9,7 @@ import jobRoute from "./routes/job.route.js";
 import applicationRoute from "./routes/application.route.js";
 import chatRoutes from './routes/chat.js';
 import { initScheduledTasks } from './services/schedulerService.js';
-import path from 'path';
+
 
 
 
@@ -18,7 +18,7 @@ dotenv.config({});
 
 const app = express();
 
-const _dirname = path.resolve();
+// const _dirname = path.resolve();
 
 // middleware
 app.use(express.json());
@@ -43,10 +43,10 @@ app.use("/api/v1/job", jobRoute);
 app.use("/api/v1/application", applicationRoute);
 app.use('/api/chat', chatRoutes); 
 
-app.use(express.static(path.join(_dirname, "/frontend/dist")));
-app.get('*',(req,res) => {
-    res.sendFile(path.resolve(_dirname, "frontend", "dist", "index.html"));
-});
+// app.use(express.static(path.join(_dirname, "/frontend/dist")));
+// app.get('*',(req,res) => {
+//     res.sendFile(path.resolve(_dirname, "frontend", "dist", "index.html"));
+// });
 
 
 
