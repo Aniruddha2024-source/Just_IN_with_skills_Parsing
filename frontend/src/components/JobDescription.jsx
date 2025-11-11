@@ -230,6 +230,7 @@ import { APPLICATION_API_END_POINT, JOB_API_END_POINT } from '@/utils/constant';
 import { setSingleJob } from '@/redux/jobSlice';
 import { useDispatch, useSelector } from 'react-redux';
 import { toast } from 'sonner';
+import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from './ui/card';
 
 const JobDescription = () => {
   const { singleJob } = useSelector(store => store.job);
@@ -271,6 +272,7 @@ const JobDescription = () => {
       navigate("/login");
       return;
     }
+    
 
     const fetchSingleJob = async () => {
       try {
@@ -303,62 +305,82 @@ const JobDescription = () => {
 
   return (
     <div className='max-w-7xl mx-auto my-10'>
-      <div className='flex items-center justify-between'>
-        <div>
-          <h1 className='font-bold text-xl'>{singleJob?.title}</h1>
-          <div className='flex items-center gap-2 mt-4'>
-            <Badge className='text-blue-700 font-bold' variant="ghost">
-              {singleJob?.position} Positions
-            </Badge>
-            <Badge className='text-[#F83002] font-bold' variant="ghost">
-              {singleJob?.jobType}
-            </Badge>
-            <Badge className='text-[#7209b7] font-bold' variant="ghost">
-              {singleJob?.salary} LPA
-            </Badge>
+      <Card className="mb-6 shadow-lg">
+        <CardHeader>
+          <div className='flex justify-between items-center'>
+            <div>
+              <CardTitle className="text-2xl font-bold">{singleJob?.title}</CardTitle>
+              <CardDescription className="mt-2">
+                <div className='flex items-center gap-2'>
+                  <Badge className='text-blue-700 font-bold' variant="ghost">
+                    {singleJob?.position} Positions
+                  </Badge>
+                  <Badge className='text-[#F83002] font-bold' variant="ghost">
+                    {singleJob?.jobType}
+                  </Badge>
+                  <Badge className='text-[#7209b7] font-bold' variant="ghost">
+                    {singleJob?.salary} LPA
+                  </Badge>
+                </div>
+              </CardDescription>
+            </div>
+            <Button
+              onClick={isApplied ? null : applyJobHandler}
+              disabled={isApplied}
+              className={`rounded-lg ${isApplied ? 'bg-gray-600 cursor-not-allowed' : 'bg-[#7209b7] hover:bg-[#5f32ad]'}`}
+            >
+              {isApplied ? 'Already Applied' : 'Apply Now'}
+            </Button>
           </div>
-        </div>
-        <Button
-          onClick={isApplied ? null : applyJobHandler}
-          disabled={isApplied}
-          className={`rounded-lg ${isApplied ? 'bg-gray-600 cursor-not-allowed' : 'bg-[#7209b7] hover:bg-[#5f32ad]'}`}
-        >
-          {isApplied ? 'Already Applied' : 'Apply Now'}
-        </Button>
-      </div>
+        </CardHeader>
+        
+        <CardContent>
+          <h2 className='border-b-2 border-b-gray-300 font-medium py-4 text-lg'>Job Description</h2>
+          <div className='my-4 grid gap-3'>
+            <div>
+              <h3 className='font-bold'>Role</h3>
+              <p className='text-gray-800'>{singleJob?.title}</p>
+            </div>
+            <div>
+              <h3 className='font-bold'>Location</h3> 
+              <p className='text-gray-800'>{singleJob?.location}</p>
+            </div>
+            <div>
+              <h3 className='font-bold'>Description</h3>
+              <div className='text-gray-800 pl-2 mt-2 whitespace-pre-wrap'>
+                {singleJob?.description}
+              </div>
+            </div>
+            <div>
+              <h3 className='font-bold'>Skills Required</h3>
+              <div className='flex flex-wrap gap-2 mt-1'>
+                {singleJob?.requirements?.map((skill, index) => (
+                  <Badge key={index} className='mr-2 bg-blue-100 text-blue-800'>{skill}</Badge>
+                ))}
+              </div>
+            </div>
+            <div>
+              <h3 className='font-bold'>Experience</h3>
+              <p className='text-gray-800'>{singleJob?.experienceLevel} yrs</p>
+            </div>
+            <div>
+              <h3 className='font-bold'>Salary</h3>
+              <p className='text-gray-800'>{singleJob?.salary} LPA</p>
+            </div>
+          </div>
+        </CardContent>
 
-      <h1 className='border-b-2 border-b-gray-300 font-medium py-4'>Job Description</h1>
-      <div className='my-4'>
-        <h1 className='font-bold my-1'>
-          Role: <span className='pl-4 font-normal text-gray-800'>{singleJob?.title}</span>
-        </h1>
-        <h1 className='font-bold my-1'>
-          Location: <span className='pl-4 font-normal text-gray-800'>{singleJob?.location}</span>
-        </h1>
-        <h1 className='font-bold my-1'>
-          Description: <span className='pl-4 font-normal text-gray-800'>{singleJob?.description}</span>
-        </h1>
-        <h1 className='font-bold my-1'>
-  Skills Required: 
-  <span className='pl-4 font-normal text-gray-800'>
-    {singleJob?.requirements?.map((skill, index) => (
-      <Badge key={index} className='mr-2 bg-blue-100 text-blue-800'>{skill}</Badge>
-    ))}
-  </span>
-</h1>
-        <h1 className='font-bold my-1'>
-          Experience: <span className='pl-4 font-normal text-gray-800'>{singleJob?.experienceLevel} yrs</span>
-        </h1>
-        <h1 className='font-bold my-1'>
-          Salary: <span className='pl-4 font-normal text-gray-800'>{singleJob?.salary} LPA</span>
-        </h1>
-        <h1 className='font-bold my-1'>
-          Total Applicants: <span className='pl-4 font-normal text-gray-800'>{singleJob?.applications?.length}</span>
-        </h1>
-        <h1 className='font-bold my-1'>
-          Posted Date: <span className='pl-4 font-normal text-gray-800'>{singleJob?.createdAt?.split("T")[0]}</span>
-        </h1>
-      </div>
+        <CardFooter className="border-t pt-4 flex justify-between">
+          <div>
+            <span className='font-bold'>Total Applicants: </span>
+            <span className='text-gray-800'>{singleJob?.applications?.length}</span>
+          </div>
+          <div>
+            <span className='font-bold'>Posted Date: </span>
+            <span className='text-gray-800'>{singleJob?.createdAt?.split("T")[0]}</span>
+          </div>
+        </CardFooter>
+      </Card>
     </div>
   );
 };

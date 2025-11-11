@@ -185,9 +185,18 @@ export const updateStatus = async (req,res) => {
             })
         };
 
-        // update the status
-        application.status = status.toLowerCase();
-        await application.save();
+    // normalize & validate status (schema expects lowercase values)
+    const allowedStatuses = ["pending", "accepted", "rejected"];
+    const normalized = String(status).trim().toLowerCase();
+    if (!allowedStatuses.includes(normalized)) {
+      return res.status(400).json({
+        message: `Invalid status. Allowed values: ${allowedStatuses.join(', ')}`,
+        success: false
+      });
+    }
+
+    application.status = normalized;
+    await application.save();
 
         return res.status(200).json({
             message:"Status updated successfully.",

@@ -1,0 +1,5 @@
+scikit-learn>=1.0
+numpy>=1.21
+scipy>=1.7
+pdfminer.six>=20200726
+python-docx>=0.8.11

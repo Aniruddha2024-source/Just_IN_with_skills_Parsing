@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import { Button } from './ui/button'
 import { Search } from 'lucide-react'
+import FlipLink from './ui/text-effect-flipper'
 //import { useDispatch } from 'react-redux';
 //import { setSearchedQuery } from '@/redux/jobSlice';
 import { useNavigate } from 'react-router-dom';
@@ -19,7 +20,20 @@ const HeroSection = () => {
         <div className='text-center'>
             <div className='flex flex-col gap-5 my-10'>
                 <span className=' mx-auto px-4 py-2 rounded-full bg-gray-100 text-[#F83002] font-medium'>Hunt JOB Easy with our Website</span>
-                <h1 className='text-5xl font-bold'>Search, Apply & <br /> Get Your <span className='text-[#6A38C2]'>Dream Jobs</span></h1>
+                
+                {/* Animated Text Flipper */}
+                <div className="flex flex-col items-center justify-center gap-2">
+                    <div className="flex flex-wrap items-center justify-center gap-4 text-center">
+                        <FlipLink>Search,</FlipLink>
+                        <FlipLink>Apply</FlipLink>
+                        <span className="text-4xl font-semibold text-black dark:text-white/90 sm:text-7xl md:text-8xl">&</span>
+                    </div>
+                    <div className="flex items-center justify-center gap-4">
+                        <span className="text-4xl font-semibold text-black dark:text-white/90 sm:text-7xl md:text-8xl">Get Your</span>
+                        <FlipLink>Dream Jobs</FlipLink>
+                    </div>
+                </div>
+
                 <p className="text-center text-sm text-gray-300 italic px-3 py-2 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 bg-clip-text text-transparent font-medium">
   Looking for your next opportunity? Ask me anything about job applications, companies, or how to get hired!
 </p>

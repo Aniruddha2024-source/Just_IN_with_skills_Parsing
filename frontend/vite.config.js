@@ -23,7 +23,9 @@ export default defineConfig({
     },
   },
   server: {
-    host: true, 
+    //host: true, 
+    host: "0.0.0.0",  // ✅ fixed IP, not 0.0.0.0
+    //port: 5173,
     proxy: {
       '/api': {
         target: 'http://localhost:8000',

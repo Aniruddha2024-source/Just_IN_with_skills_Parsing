@@ -9,6 +9,7 @@ import jobRoute from "./routes/job.route.js";
 import applicationRoute from "./routes/application.route.js";
 import chatRoutes from './routes/chat.js';
 import { initScheduledTasks } from './services/schedulerService.js';
+import path from 'path';
 
 
 
@@ -17,12 +18,15 @@ dotenv.config({});
 
 const app = express();
 
+const _dirname = path.resolve();
+
 // middleware
 app.use(express.json());
 app.use(express.urlencoded({extended:true}));
 app.use(cookieParser());
 const corsOptions = {
-    origin:'http://localhost:5173',
+    origin:['http://localhost:5173',
+    'http://192.168.1.5:5173'],
     credentials:true
 }
 
@@ -39,12 +43,17 @@ app.use("/api/v1/job", jobRoute);
 app.use("/api/v1/application", applicationRoute);
 app.use('/api/chat', chatRoutes); 
 
+app.use(express.static(path.join(_dirname, "/frontend/dist")));
+app.get('*',(req,res) => {
+    res.sendFile(path.resolve(_dirname, "frontend", "dist", "index.html"));
+});
 
 
 
-app.listen(PORT,()=>{
+
+app.listen(PORT,"0.0.0.0", ()=>{
     connectDB();
     // Initialize scheduled tasks for job matching
     initScheduledTasks();
-    console.log(`Server running at port ${PORT}`);
+    console.log(`Server running at port http://0.0.0.0:${PORT}`);
 })

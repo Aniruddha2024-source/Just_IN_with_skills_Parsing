@@ -4,6 +4,10 @@ import jwt from "jsonwebtoken";
 import getDataUri from "../utils/datauri.js";
 import cloudinary from "../utils/cloudinary.js";
 import { sendJobRecommendationsToUser } from "../services/jobMatchingService.js";
+import { writeFile, unlink } from 'fs/promises';
+import os from 'os';
+import { spawn } from 'child_process';
+import path from 'path';
 
 
 /*export const register = async (req, res) => {
@@ -319,8 +323,75 @@ export const updateProfile = async (req, res) => {
         user.profile.resumeOriginalName = file.originalname;
       }
       console.log("Cloudinary Upload Response:", cloudResponse);
+      
+      // Try to extract resume text using Python extractor
+      try {
+        // write buffer to a temp file with original extension
+        const tmpDir = os.tmpdir();
+        const ext = path.extname(file.originalname) || '.pdf';
+        const tmpPath = path.join(tmpDir, `resume-${Date.now()}${ext}`);
+        await writeFile(tmpPath, file.buffer);
+
+  // call python extractor script (resolve from process.cwd()). If server is started from backend/ folder,
+  // process.cwd() already points to backend, so do NOT prepend another 'backend' segment.
+  const scriptPath = path.normalize(path.join(process.cwd(), 'ml', 'extract_resume.py'));
+  console.log('Calling resume extractor at', scriptPath);
+
+  const py = spawn('python', [scriptPath, tmpPath], { stdio: ['ignore', 'pipe', 'pipe'] });
+
+        let out = '';
+        let err = '';
+        py.stdout.on('data', (d) => { out += d.toString(); });
+        py.stderr.on('data', (d) => { err += d.toString(); });
+
+        const exitCode = await new Promise((resolve) => py.on('close', resolve));
+        if (exitCode === 0) {
+          try {
+            const parsed = JSON.parse(out || '{}');
+            if (parsed.text) {
+              // Save extracted text to profile
+              user.profile.resumeText = parsed.text;
+
+              // Basic skill extraction from a small builtin list
+              const knownSkills = [
+                'python','java','javascript','react','node','django','flask','sql','mongodb','aws','azure','docker','kubernetes','machine learning','data science','c++','c#','php','html','css','typescript','tensorflow','pytorch','excel','git','rest','graphql'
+              ];
+
+              const lowered = parsed.text.toLowerCase();
+              const found = new Set();
+              for (const s of knownSkills) {
+                const key = s.toLowerCase();
+                // simple contains check; word boundary for single words
+                if (key.includes(' ')) {
+                  if (lowered.includes(key)) found.add(s);
+                } else {
+                  const re = new RegExp('\\b' + key.replace(/[-/\\^$*+?.()|[\]{}]/g, '\\$&') + '\\b', 'i');
+                  if (re.test(parsed.text)) found.add(s);
+                }
+              }
+
+              if (found.size > 0) {
+                const skillList = Array.from(found);
+                // merge with any existing skills provided in request
+                const existing = Array.isArray(user.profile?.skills) ? user.profile.skills : [];
+                const merged = Array.from(new Set([...existing, ...skillList]));
+                user.profile.skills = merged;
+                skillsUpdated = true;
+              }
+            }
+          } catch (e) {
+            console.warn('Failed parsing extractor output:', e.message);
+          }
+        } else {
+          console.warn('Resume extractor returned non-zero code', exitCode, err);
+        }
+
+        // cleanup temp file
+        try { await unlink(tmpPath); } catch (e) { /* ignore */ }
+      } catch (e) {
+        console.warn('Resume extraction failed:', e.message || e);
+      }
     }
-    
     await user.save();
 
     // If skills were updated, trigger job matching
