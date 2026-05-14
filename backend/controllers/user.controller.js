@@ -252,6 +252,7 @@ export const login = async (req, res) => {
     console.log("FRONTEND_URL:", process.env.FRONTEND_URL);
     console.log("isProduction:", isProduction);
     console.log("Cookie settings:", {
+      path: '/',
       sameSite: isProduction ? 'none' : 'lax',
       secure: isProduction ? true : false,
       httpOnly: true
@@ -259,10 +260,11 @@ export const login = async (req, res) => {
     
     return res.status(200)
       .cookie("token", token, {
-        maxAge: 1 * 24 * 60 * 60 * 1000,     // 1 day
-        httpOnly: true,                       // Prevents JavaScript access
+        path: '/',                                // CRITICAL: Set path to / so cookie is sent to all routes
+        maxAge: 1 * 24 * 60 * 60 * 1000,         // 1 day
+        httpOnly: true,                           // Prevents JavaScript access
         sameSite: isProduction ? 'none' : 'lax',  // 'none' for cross-origin, 'lax' for local dev
-        secure: isProduction ? true : false   // 'true' for production (HTTPS), 'false' for local dev
+        secure: isProduction ? true : false       // 'true' for production (HTTPS), 'false' for local dev
       })
       .json({
         message: `Welcome back ${user.fullname}`,
@@ -286,6 +288,7 @@ export const logout = async (req, res) => {
         const isProduction = process.env.NODE_ENV === 'production' || process.env.FRONTEND_URL?.includes('vercel.app');
         
         return res.status(200).cookie("token", "", {
+            path: '/',                                      // Clear at root path
             maxAge: 0,
             httpOnly: true,
             sameSite: isProduction ? 'none' : 'lax',
