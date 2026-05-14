@@ -244,28 +244,30 @@ export const login = async (req, res) => {
     };
 
     // Step 7: Set cookie and return response
-    // For cross-origin requests (Vercel frontend with Railway backend), use SameSite=None with Secure
-    const isProduction = process.env.NODE_ENV === 'production' || process.env.FRONTEND_URL?.includes('vercel.app');
+    // For cross-origin requests (Vercel frontend with Railway backend), MUST use SameSite=None with Secure
+    // Force these settings for Railway HTTPS backend
+    const isProduction = process.env.NODE_ENV === 'production' || process.env.FRONTEND_URL?.includes('vercel.app') || process.env.FRONTEND_URL?.includes('railway.app');
     
     console.log("=== LOGIN COOKIE DEBUG ===");
     console.log("NODE_ENV:", process.env.NODE_ENV);
     console.log("FRONTEND_URL:", process.env.FRONTEND_URL);
-    console.log("isProduction:", isProduction);
-    console.log("Cookie settings:", {
+    console.log("isProduction (detected):", isProduction);
+    console.log("Req protocol:", req.protocol);
+    console.log("Req hostname:", req.hostname);
+    
+    // For Railway (HTTPS), always use secure + sameSite: 'none' for cross-origin
+    const cookieOptions = {
       path: '/',
-      sameSite: isProduction ? 'none' : 'lax',
-      secure: isProduction ? true : false,
-      httpOnly: true
-    });
+      maxAge: 1 * 24 * 60 * 60 * 1000,
+      httpOnly: true,
+      sameSite: 'none',  // CRITICAL: 'none' required for cross-origin
+      secure: true       // CRITICAL: true required when sameSite: 'none'
+    };
+    
+    console.log("Cookie options being set:", cookieOptions);
     
     return res.status(200)
-      .cookie("token", token, {
-        path: '/',                                // CRITICAL: Set path to / so cookie is sent to all routes
-        maxAge: 1 * 24 * 60 * 60 * 1000,         // 1 day
-        httpOnly: true,                           // Prevents JavaScript access
-        sameSite: isProduction ? 'none' : 'lax',  // 'none' for cross-origin, 'lax' for local dev
-        secure: isProduction ? true : false       // 'true' for production (HTTPS), 'false' for local dev
-      })
+      .cookie("token", token, cookieOptions)
       .json({
         message: `Welcome back ${user.fullname}`,
         user: userData,
@@ -285,18 +287,21 @@ export const login = async (req, res) => {
 
 export const logout = async (req, res) => {
     try {
-        const isProduction = process.env.NODE_ENV === 'production' || process.env.FRONTEND_URL?.includes('vercel.app');
-        
-        return res.status(200).cookie("token", "", {
-            path: '/',                                      // Clear at root path
+        // For Railway (HTTPS), always use secure + sameSite: 'none' for cross-origin
+        const cookieOptions = {
+            path: '/',
             maxAge: 0,
             httpOnly: true,
-            sameSite: isProduction ? 'none' : 'lax',
-            secure: isProduction ? true : false
-        }).json({
-            message: "Logged out successfully.",
-            success: true
-        })
+            sameSite: 'none',
+            secure: true
+        };
+        
+        return res.status(200)
+            .cookie("token", "", cookieOptions)
+            .json({
+                message: "Logged out successfully.",
+                success: true
+            })
     } catch (error) {
         console.log(error);
     }
