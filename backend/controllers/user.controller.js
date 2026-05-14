@@ -11,8 +11,10 @@ import os from 'os';
 import { spawn } from 'child_process';
 import path from 'path';
 
-// Python 3.13 executable path (for Spacy ML integration)
-const PYTHON_EXECUTABLE = 'C:\\Users\\aniru\\AppData\\Local\\Programs\\Python\\Python313\\python.exe';
+// Python executable path - cross-platform (Windows vs Linux/Docker)
+const PYTHON_EXECUTABLE = process.platform === 'win32' 
+  ? 'C:\\Users\\aniru\\AppData\\Local\\Programs\\Python\\Python313\\python.exe'
+  : 'python3';  // Linux/Docker uses 'python3'
 
 
 /*export const register = async (req, res) => {
@@ -371,6 +373,12 @@ export const updateProfile = async (req, res) => {
   console.log('Calling resume extractor at', scriptPath);
 
   const py = spawn(PYTHON_EXECUTABLE, [scriptPath, tmpPath], { stdio: ['ignore', 'pipe', 'pipe'] });
+  
+  // Add error handler to prevent crash if Python is not found
+  py.on('error', (err) => {
+    console.error('❌ Python spawn error:', err.message);
+    console.log('Falling back to rule-based skill extraction (Python not available)');
+  });
 
         let out = '';
         let err = '';
@@ -396,6 +404,12 @@ export const updateProfile = async (req, res) => {
               });
 
               const spacyPy = spawn(PYTHON_EXECUTABLE, [spacyExtractorPath], { stdio: ['pipe', 'pipe', 'pipe'] });
+              
+              // Add error handler to prevent crash if Python is not found
+              spacyPy.on('error', (err) => {
+                console.error('❌ Spacy Python spawn error:', err.message);
+              });
+              
               let spacyOut = '';
               let spacyErr = '';
               
