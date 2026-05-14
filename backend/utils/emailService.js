@@ -6,12 +6,13 @@ dotenv.config();
 // Check if email configuration is available
 const isEmailConfigured = process.env.EMAIL_USER && process.env.EMAIL_PASS;
 
-console.log("=== EMAIL SERVICE DEBUG ===");
+console.log("=== EMAIL SERVICE DEBUG (Nodemailer + Gmail SMTP) ===");
 console.log("EMAIL_HOST:", process.env.EMAIL_HOST ? "✅ Set" : "❌ Missing");
 console.log("EMAIL_PORT:", process.env.EMAIL_PORT ? "✅ Set" : "❌ Missing");
 console.log("EMAIL_USER:", process.env.EMAIL_USER ? "✅ Set" : "❌ Missing");
 console.log("EMAIL_PASS:", process.env.EMAIL_PASS ? "✅ Set (hidden)" : "❌ Missing");
 console.log("EMAIL_SECURE:", process.env.EMAIL_SECURE ? process.env.EMAIL_SECURE : "❌ Missing (default: false)");
+console.log("NODE_ENV:", process.env.NODE_ENV || "development");
 console.log("isEmailConfigured:", isEmailConfigured);
 
 // Create a transporter object only if email is configured
@@ -21,12 +22,22 @@ if (isEmailConfigured) {
   try {
     const emailPort = parseInt(process.env.EMAIL_PORT || '587', 10);
     const emailSecure = process.env.EMAIL_SECURE === 'true' || emailPort === 465;
+    const isProduction = process.env.NODE_ENV === 'production';
     
     console.log("Creating transporter with:");
     console.log("  Host:", process.env.EMAIL_HOST || 'smtp.gmail.com');
     console.log("  Port:", emailPort);
     console.log("  Secure:", emailSecure);
+    console.log("  Environment: ", isProduction ? "Production (Railway)" : "Development");
     
+    // Railway-optimized transporter configuration
+    // Key fixes for ETIMEDOUT on Railway:
+    // 1. connectionTimeout: 10s - quickly fail if can't connect
+    // 2. socketTimeout: 30s - timeout for data transfer
+    // 3. maxConnections: 5 - connection pooling to reuse connections
+    // 4. maxMessages: Infinity - send unlimited emails per connection
+    // 5. rateDelta: 1000 - milliseconds between messages
+    // 6. rateLimit: 5 - max 5 emails per rateDelta
     transporter = nodemailer.createTransport({
       host: process.env.EMAIL_HOST || 'smtp.gmail.com',
       port: emailPort,
@@ -36,20 +47,44 @@ if (isEmailConfigured) {
         pass: process.env.EMAIL_PASS,
       },
       tls: {
-        rejectUnauthorized: false
-      }
+        rejectUnauthorized: false,
+        // Additional TLS options for Railway compatibility
+        minVersion: 'TLSv1.2'
+      },
+      // Connection pooling and timeout settings (Railway optimization)
+      pool: {
+        maxConnections: 5,        // Keep 5 connections in pool
+        maxMessages: Infinity,     // Reuse connections for many emails
+        rateDelta: 1000,          // Milliseconds between rate limit resets
+        rateLimit: 5              // Max 5 emails per second
+      },
+      // Socket/connection timeout settings (prevent ETIMEDOUT)
+      connectionTimeout: 10 * 1000,  // 10 seconds to connect (was infinite)
+      socketTimeout: 30 * 1000,      // 30 seconds for data transfer (was infinite)
+      // Additional options
+      greetingTimeout: 30 * 1000,    // 30 seconds for SMTP greeting
+      logger: isProduction ? true : false,  // Log SMTP transactions in production
+      debug: !isProduction,           // Debug mode in development only
+      authMethod: 'LOGIN'             // Use LOGIN auth method (more compatible)
     });
 
-    // Verify transporter configuration asynchronously
-    transporter.verify()
-      .then(success => {
-        console.log('✅ SMTP server connection successful, ready to send emails');
-      })
-      .catch(error => {
-        console.error('⚠️ SMTP server connection error:', error.message);
-        console.log('Email will still be attempted, but may fail if credentials are invalid');
-        console.log('For Gmail, make sure you are using an App Password');
-      });
+    // Verify transporter configuration asynchronously (don't block server startup)
+    // This happens in background after server starts
+    setImmediate(() => {
+      transporter.verify()
+        .then(success => {
+          console.log('✅ SMTP server connection successful, ready to send emails');
+        })
+        .catch(error => {
+          console.error('⚠️ SMTP server connection error on startup:', error.message);
+          console.log('   Error Code:', error.code);
+          console.log('   Email will still be attempted when needed');
+          console.log('   Common fixes:');
+          console.log('   - Ensure EMAIL_USER and EMAIL_PASS are Gmail App Password (not regular password)');
+          console.log('   - Verify no 2-factor authentication is blocking SMTP');
+          console.log('   - Check Railway dashboard for EMAIL_* environment variables');
+        });
+    });
   } catch (error) {
     console.error('Failed to create email transporter:', error.message);
     console.log('Email functionality will be disabled');
@@ -59,6 +94,43 @@ if (isEmailConfigured) {
   console.log('⚠️ Email configuration not found (missing EMAIL_USER or EMAIL_PASS). Email functionality will be disabled.');
   console.log('Please set EMAIL_USER and EMAIL_PASS environment variables on Railway Dashboard');
 }
+
+/**
+ * Helper function: Send email with retry logic
+ * Retries up to 3 times if connection fails (Railway optimization)
+ * @param {Object} mailOptions - Email options for transporter.sendMail()
+ * @param {Number} retryCount - Current retry attempt (internal)
+ * @returns {Promise} - Email send result or error
+ */
+const sendMailWithRetry = async (mailOptions, retryCount = 0) => {
+  const MAX_RETRIES = 2;  // Total attempts = 3 (initial + 2 retries)
+  const RETRY_DELAY = 2000;  // 2 seconds between retries
+  
+  try {
+    const info = await transporter.sendMail(mailOptions);
+    return { success: true, data: info };
+  } catch (error) {
+    // Determine if error is retryable
+    const isRetryable = error.code === 'ETIMEDOUT' || 
+                       error.code === 'ECONNREFUSED' || 
+                       error.code === 'ECONNRESET' ||
+                       error.message?.includes('timeout') ||
+                       error.message?.includes('TIMEOUT');
+    
+    if (isRetryable && retryCount < MAX_RETRIES) {
+      console.warn(`⚠️ Email send failed (${error.code}), retrying in ${RETRY_DELAY}ms (attempt ${retryCount + 1}/${MAX_RETRIES})...`);
+      
+      // Wait before retry
+      await new Promise(resolve => setTimeout(resolve, RETRY_DELAY));
+      
+      // Recursive retry
+      return sendMailWithRetry(mailOptions, retryCount + 1);
+    }
+    
+    // Non-retryable error or max retries reached
+    return { success: false, error };
+  }
+};
 
 /**
  * Send an email with job recommendations
@@ -150,30 +222,49 @@ export const sendJobRecommendationEmail = async (to, subject, matchingJobs, user
       </div>
     `;
 
-    // Send mail with defined transport object
-    console.log(`📧 Attempting to send email to ${to} with subject: "${subject}"`);
-    console.log(`   From: ${process.env.EMAIL_USER}`);
-    
-    const info = await transporter.sendMail({
+    // Prepare mail options
+    const mailOptions = {
       from: `"Job Portal" <${process.env.EMAIL_USER}>`,
       to,
       subject,
       html: htmlContent,
-    });
+    };
 
-    console.log(`✅ Email sent successfully!`);
-    console.log(`   Message ID: ${info.messageId}`);
-    console.log(`   To: ${to}`);
-    return { success: true, messageId: info.messageId };
+    // Send mail with retry logic (handles ETIMEDOUT on Railway)
+    console.log(`📧 Attempting to send email to ${to} with subject: "${subject}"`);
+    console.log(`   From: ${process.env.EMAIL_USER}`);
+    
+    const result = await sendMailWithRetry(mailOptions);
+
+    if (result.success) {
+      console.log(`✅ Email sent successfully!`);
+      console.log(`   Message ID: ${result.data.messageId}`);
+      console.log(`   To: ${to}`);
+      return { success: true, messageId: result.data.messageId };
+    } else {
+      // Retry failed, return error
+      const errorMsg = result.error?.message || 'Unknown error';
+      const errorCode = result.error?.code || 'UNKNOWN';
+      console.error('❌ Error sending email after retries:', errorMsg);
+      console.error('   Error code:', errorCode);
+      
+      return { 
+        error: errorMsg, 
+        success: false,
+        details: errorCode === 'EAUTH' ? 'Authentication failed. Check your email credentials (use Gmail App Password).' : errorCode,
+        code: errorCode
+      };
+    }
   } catch (error) {
-    console.error('❌ Error sending email:', error.message);
+    console.error('❌ Unexpected error sending email:', error.message);
     console.error('   Error code:', error.code);
     console.error('   Error details:', error);
     // Return error object instead of throwing to prevent crashes
     return { 
       error: error.message, 
       success: false,
-      details: error.code === 'EAUTH' ? 'Authentication failed. Check your email credentials (use Gmail App Password).' : error.code 
+      details: error.code === 'EAUTH' ? 'Authentication failed. Check your email credentials (use Gmail App Password).' : error.code,
+      code: error.code
     };
   }
 };
@@ -198,6 +289,8 @@ export const sendNewJobNotificationEmail = async (to, job, userName) => {
 
   try {
     const subject = `New Job Opportunity: ${job.title}`;
+    const frontendURL = process.env.FRONTEND_URL || 'http://localhost:5173';
+    const jobId = job.jobId || job._id || '';
     
     // Create HTML content for the email
     const htmlContent = `
@@ -213,6 +306,9 @@ export const sendNewJobNotificationEmail = async (to, job, userName) => {
           <p><strong>Job Type:</strong> ${job.jobType}</p>
           <p><strong>Required Skills:</strong> ${job.requirements.join(', ')}</p>
           <p><strong>Description:</strong> ${job.description.substring(0, 150)}${job.description.length > 150 ? '...' : ''}</p>
+          <p style="margin: 15px 0 0 0;">
+            <a href="${frontendURL}/jobs/${jobId}" style="background: #3498db; color: white; padding: 12px 25px; text-decoration: none; border-radius: 5px; display: inline-block; font-weight: bold;">View Full Details →</a>
+          </p>
         </div>
         
         <p>Visit our platform to apply for this position!</p>
@@ -220,23 +316,47 @@ export const sendNewJobNotificationEmail = async (to, job, userName) => {
       </div>
     `;
 
-    // Send mail with defined transport object
-    const info = await transporter.sendMail({
+    // Prepare mail options
+    const mailOptions = {
       from: `"Job Portal" <${process.env.EMAIL_USER}>`,
       to,
       subject,
       html: htmlContent,
-    });
+    };
 
-    console.log(`New job notification email sent to ${to}: ${info.messageId}`);
-    return { success: true, messageId: info.messageId };
+    // Send mail with retry logic
+    console.log(`📧 Attempting to send new job notification to ${to} with subject: "${subject}"`);
+    
+    const result = await sendMailWithRetry(mailOptions);
+
+    if (result.success) {
+      console.log(`✅ New job notification email sent successfully!`);
+      console.log(`   Message ID: ${result.data.messageId}`);
+      console.log(`   To: ${to}`);
+      return { success: true, messageId: result.data.messageId };
+    } else {
+      // Retry failed
+      const errorMsg = result.error?.message || 'Unknown error';
+      const errorCode = result.error?.code || 'UNKNOWN';
+      console.error('❌ Error sending new job notification after retries:', errorMsg);
+      console.error('   Error code:', errorCode);
+      
+      return { 
+        error: errorMsg, 
+        success: false,
+        details: errorCode === 'EAUTH' ? 'Authentication failed. Check your email credentials.' : errorCode,
+        code: errorCode
+      };
+    }
   } catch (error) {
-    console.error('Error sending new job notification email:', error);
+    console.error('❌ Unexpected error sending new job notification:', error.message);
+    console.error('   Error code:', error.code);
     // Return error object instead of throwing to prevent crashes
     return { 
       error: error.message, 
       success: false,
-      details: error.code === 'EAUTH' ? 'Authentication failed. Check your email credentials.' : error.code 
+      details: error.code === 'EAUTH' ? 'Authentication failed. Check your email credentials.' : error.code,
+      code: error.code
     };
   }
 };
