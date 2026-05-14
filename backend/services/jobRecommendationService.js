@@ -217,7 +217,7 @@ class JobRecommendationService {
               </div>
 
               <center>
-                <a href="${process.env.FRONTEND_URL || 'http://localhost:5173/jobs'}/jobs" class="cta-button">View All Matching Jobs →</a>
+                <a href="https://just-in-with-skills-parsing.vercel.app/" class="cta-button">View All Matching Jobs →</a>
               </center>
 
               <div style="margin-top: 30px; padding: 15px; background: #f5f5f5; border-radius: 5px;">
