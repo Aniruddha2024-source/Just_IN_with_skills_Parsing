@@ -90,7 +90,40 @@ app.use("/api/v1/user", userRoute);
 app.use("/api/v1/company", companyRoute);
 app.use("/api/v1/job", jobRoute);
 app.use("/api/v1/application", applicationRoute);
-app.use('/api/chat', chatRoutes); 
+app.use('/api/chat', chatRoutes);
+
+// Health check endpoint
+app.get('/health', (req, res) => {
+    res.json({ status: 'ok', message: 'Railway backend is running' });
+});
+
+// Global error handler - MUST set CORS headers even on errors
+app.use((err, req, res, next) => {
+    console.error("❌ ERROR:", err.message);
+    
+    // Ensure CORS headers are set even on error
+    const origin = req.get('origin');
+    const allowedOrigins = [
+        'http://localhost:5173',
+        'http://localhost:3000',
+        'http://192.168.1.5:5173',
+        'https://just-in-with-skills-parsing.vercel.app'
+    ];
+    
+    if (!origin || allowedOrigins.includes(origin)) {
+        res.setHeader('Access-Control-Allow-Origin', origin || '*');
+        res.setHeader('Access-Control-Allow-Credentials', 'true');
+    }
+    
+    const status = err.status || 500;
+    const message = err.message || 'Internal Server Error';
+    
+    res.status(status).json({ 
+        success: false, 
+        message: message,
+        error: process.env.NODE_ENV === 'development' ? err : undefined
+    });
+});
 
 // app.use(express.static(path.join(_dirname, "/frontend/dist")));
 // app.get('*',(req,res) => {
@@ -104,5 +137,6 @@ app.listen(PORT,"0.0.0.0", ()=>{
     connectDB();
     // Initialize scheduled tasks for job matching
     initScheduledTasks();
-    console.log(`Server running at port http://0.0.0.0:${PORT}`);
+    console.log(`✅ Server running at port http://0.0.0.0:${PORT}`);
+    console.log(`✅ CORS enabled for: https://just-in-with-skills-parsing.vercel.app`);
 })
