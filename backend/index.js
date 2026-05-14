@@ -35,10 +35,16 @@ const corsOptions = {
             'https://just-in-with-skills-parsing.vercel.app'
         ];
         
+        console.log("=== CORS DEBUG ===");
+        console.log("Request origin:", origin);
+        console.log("Allowed origins:", allowedOrigins);
+        
         // Allow requests with no origin (like mobile apps or curl requests)
         if (!origin || allowedOrigins.includes(origin)) {
+            console.log("✅ Origin allowed");
             callback(null, true);
         } else {
+            console.log("❌ Origin blocked");
             callback(new Error('Not allowed by CORS'));
         }
     },
@@ -46,13 +52,34 @@ const corsOptions = {
     optionsSuccessStatus: 200,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
-    exposedHeaders: ['Content-Type']
+    exposedHeaders: ['Content-Type', 'Set-Cookie', 'Authorization']
 };
 
 app.use(cors(corsOptions));
 
 // Handle preflight requests explicitly
 app.options('*', cors(corsOptions));
+
+// Add a middleware to log requests and ensure CORS headers on all responses
+app.use((req, res, next) => {
+    console.log(`[${new Date().toISOString()}] ${req.method} ${req.path}`);
+    
+    // Ensure CORS headers are set
+    const origin = req.get('origin');
+    const allowedOrigins = [
+        'http://localhost:5173',
+        'http://localhost:3000',
+        'http://192.168.1.5:5173',
+        'https://just-in-with-skills-parsing.vercel.app'
+    ];
+    
+    if (!origin || allowedOrigins.includes(origin)) {
+        res.setHeader('Access-Control-Allow-Origin', origin || '*');
+        res.setHeader('Access-Control-Allow-Credentials', 'true');
+    }
+    
+    next();
+});
 
 
 const PORT = process.env.PORT || 3000;
