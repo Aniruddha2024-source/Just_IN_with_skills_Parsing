@@ -1,0 +1,121 @@
+{
+  "test_cases": [
+    {
+      "name": "Python Data Engineer - Mixed skills",
+      "resume_text": "Experienced Python developer and data engineer with 4 years of experience. Skilled in Pandas, NumPy, SQL, PostgreSQL, ETL pipelines, AWS S3, and Docker. Familiar with Airflow and CI/CD pipelines. Worked on ML projects using scikit-learn.",
+      "jobs": [
+        {"_id": "job1", "title": "Python Backend Developer", "description": "Develop backend APIs with Python and Flask. Work with PostgreSQL and Docker.", "requirements": ["python", "flask", "postgresql", "docker"]},
+        {"_id": "job2", "title": "Data Scientist", "description": "Build ML models using Python, scikit-learn, and pandas.", "requirements": ["python", "machine learning", "scikit-learn", "pandas"]},
+        {"_id": "job3", "title": "DevOps Engineer", "description": "Manage CI/CD pipelines using Jenkins, Docker, and AWS.", "requirements": ["docker", "ci/cd", "aws", "jenkins"]},
+        {"_id": "job4", "title": "Frontend Developer", "description": "Build web UIs using React, HTML, CSS.", "requirements": ["react", "html", "css"]},
+        {"_id": "job5", "title": "Java Backend Developer", "description": "Work on Java backend services and SQL databases.", "requirements": ["java", "spring", "sql"]}
+      ],
+      "expected_matches": ["job1", "job2", "job3"]
+    },
+    {
+      "name": "Full-Stack JavaScript Developer",
+      "resume_text": "Full-stack developer with 3 years of experience in Node.js, Express, React, MongoDB, HTML, CSS, and JavaScript ES6+. Familiar with Docker and AWS. Built production web apps and REST APIs.",
+      "jobs": [
+        {"_id": "job6", "title": "React Frontend Developer", "description": "Develop frontend interfaces using React and Redux.", "requirements": ["react", "javascript", "html", "css"]},
+        {"_id": "job7", "title": "Node.js Backend Developer", "description": "Develop APIs using Node.js, Express, and MongoDB.", "requirements": ["node.js", "express", "mongodb"]},
+        {"_id": "job8", "title": "Full-Stack MERN Developer", "description": "Build web apps using MongoDB, Express, React, Node.js.", "requirements": ["react", "node.js", "mongodb", "express"]},
+        {"_id": "job2", "title": "Data Scientist", "description": "Build ML models using Python.", "requirements": ["python", "machine learning", "pandas"]},
+        {"_id": "job1", "title": "Python Backend Developer", "description": "Backend APIs using Python and Flask.", "requirements": ["python", "flask"]}
+      ],
+      "expected_matches": ["job6", "job7", "job8"]
+    },
+    {
+      "name": "Data Scientist with ML skills",
+      "resume_text": "Data scientist experienced in Python, pandas, NumPy, TensorFlow, scikit-learn, and SQL. Built ML pipelines, data visualizations with matplotlib and seaborn, and automated reports with Airflow. Some exposure to AWS and Docker.",
+      "jobs": [
+        {"_id": "job2", "title": "Data Scientist", "description": "Build ML models using Python and scikit-learn.", "requirements": ["python", "machine learning", "scikit-learn", "pandas"]},
+        {"_id": "job9", "title": "Machine Learning Engineer", "description": "Develop ML pipelines and deploy models using TensorFlow and AWS.", "requirements": ["python", "tensorflow", "machine learning", "aws"]},
+        {"_id": "job3", "title": "DevOps Engineer", "description": "Manage Docker and CI/CD pipelines.", "requirements": ["docker", "ci/cd"]},
+        {"_id": "job6", "title": "React Frontend Developer", "description": "Frontend development using React.", "requirements": ["react", "javascript", "html", "css"]},
+        {"_id": "job5", "title": "Java Backend Developer", "description": "Develop backend services in Java.", "requirements": ["java", "sql"]}
+      ],
+      "expected_matches": ["job2", "job9"]
+    },
+    {
+      "name": "DevOps Engineer",
+      "resume_text": "DevOps engineer skilled in AWS, Kubernetes, Docker, Terraform, CI/CD pipelines, Jenkins, and GitLab CI. Experienced in cloud infrastructure automation and Linux server management.",
+      "jobs": [
+        {"_id": "job3", "title": "DevOps Engineer", "description": "Manage CI/CD pipelines, Docker, Kubernetes, and AWS.", "requirements": ["docker", "kubernetes", "aws", "ci/cd"]},
+        {"_id": "job11", "title": "Cloud Engineer", "description": "Manage cloud infrastructure using AWS, Terraform, and Kubernetes.", "requirements": ["aws", "terraform", "kubernetes"]},
+        {"_id": "job12", "title": "Site Reliability Engineer", "description": "Maintain reliability and CI/CD pipelines.", "requirements": ["ci/cd", "docker", "kubernetes"]},
+        {"_id": "job1", "title": "Python Backend Developer", "description": "Backend APIs in Python.", "requirements": ["python", "flask"]},
+        {"_id": "job6", "title": "React Frontend Developer", "description": "Frontend React development.", "requirements": ["react", "javascript"]}
+      ],
+      "expected_matches": ["job3", "job11", "job12"]
+    },
+    {
+      "name": "Java Enterprise Developer",
+      "resume_text": "Java developer with 7 years experience in Spring Boot, Hibernate, microservices, SQL, Docker, and REST APIs. Built enterprise applications and cloud-native microservices.",
+      "jobs": [
+        {"_id": "job5", "title": "Java Backend Developer", "description": "Enterprise backend development with Java and Spring Boot.", "requirements": ["java", "spring boot", "microservices", "sql"]},
+        {"_id": "job13", "title": "Java Spring Boot Developer", "description": "Develop REST APIs with Spring Boot.", "requirements": ["java", "spring boot", "rest api"]},
+        {"_id": "job14", "title": "Microservices Architect", "description": "Design microservices with Java and Kubernetes.", "requirements": ["java", "microservices", "kubernetes"]},
+        {"_id": "job2", "title": "Data Scientist", "description": "Python ML jobs.", "requirements": ["python", "tensorflow"]},
+        {"_id": "job6", "title": "React Frontend Developer", "description": "Frontend React development.", "requirements": ["react", "javascript"]}
+      ],
+      "expected_matches": ["job5", "job13", "job14"]
+    },
+    {
+      "name": "Front-end Developer",
+      "resume_text": "Frontend engineer skilled in React, Vue, HTML, CSS, JavaScript, responsive design, and UI testing. Some exposure to Node.js backend integration and REST APIs.",
+      "jobs": [
+        {"_id": "job6", "title": "React Frontend Developer", "description": "Develop frontend interfaces using React.", "requirements": ["react", "javascript", "html", "css"]},
+        {"_id": "job15", "title": "Vue.js Developer", "description": "Develop single-page applications with Vue.js.", "requirements": ["vue", "javascript", "html", "css"]},
+        {"_id": "job7", "title": "Node.js Backend Developer", "description": "Node.js backend.", "requirements": ["node.js", "express"]},
+        {"_id": "job16", "title": "UI/UX Designer", "description": "Design UI/UX for web apps.", "requirements": ["figma", "adobe xd"]},
+        {"_id": "job4", "title": "Java Backend Engineer", "description": "Enterprise Java backend.", "requirements": ["java", "spring"]}
+      ],
+      "expected_matches": ["job6", "job15"]
+    },
+    {
+      "name": "Mobile App Developer",
+      "resume_text": "Android and iOS developer skilled in Kotlin, Java, Swift, React Native, Firebase, and REST APIs. Built hybrid apps with integration to cloud services.",
+      "jobs": [
+        {"_id": "job17", "title": "Android Developer", "description": "Build native Android apps with Kotlin and Java.", "requirements": ["android", "kotlin", "java"]},
+        {"_id": "job18", "title": "iOS Developer", "description": "Build native iOS apps with Swift.", "requirements": ["ios", "swift"]},
+        {"_id": "job19", "title": "React Native Developer", "description": "Build cross-platform apps with React Native and Firebase.", "requirements": ["react native", "javascript", "firebase"]},
+        {"_id": "job6", "title": "React Frontend Developer", "description": "Frontend React development.", "requirements": ["react", "javascript"]}
+      ],
+      "expected_matches": ["job17", "job18", "job19"]
+    },
+    {
+      "name": "QA Engineer",
+      "resume_text": "QA engineer experienced in automated testing, Selenium, Cypress, unit testing, API testing, and Python scripting. Familiar with CI/CD pipelines and Git.",
+      "jobs": [
+        {"_id": "job20", "title": "QA Automation Engineer", "description": "Automate tests using Selenium, Cypress, and unit testing.", "requirements": ["selenium", "cypress", "unit testing"]},
+        {"_id": "job21", "title": "Manual QA Tester", "description": "Manual testing and bug reporting.", "requirements": ["manual testing", "test cases"]},
+        {"_id": "job3", "title": "DevOps Engineer", "description": "Manage CI/CD pipelines.", "requirements": ["docker", "ci/cd"]},
+        {"_id": "job1", "title": "Python Backend Developer", "description": "Python backend.", "requirements": ["python", "flask"]}
+      ],
+      "expected_matches": ["job20"]
+    },
+    {
+      "name": "Cloud Solutions Architect",
+      "resume_text": "Cloud architect with experience in AWS, Azure, GCP, Terraform, Kubernetes, Docker, microservices, and scalable architecture. Worked on hybrid cloud solutions and CI/CD pipelines.",
+      "jobs": [
+        {"_id": "job11", "title": "Cloud Engineer", "description": "AWS and Kubernetes cloud infrastructure.", "requirements": ["aws", "kubernetes", "terraform"]},
+        {"_id": "job12", "title": "Site Reliability Engineer", "description": "Maintain reliability and automation.", "requirements": ["ci/cd", "docker", "kubernetes"]},
+        {"_id": "job3", "title": "DevOps Engineer", "description": "CI/CD, Docker, Kubernetes.", "requirements": ["docker", "ci/cd"]},
+        {"_id": "job22", "title": "Solutions Architect", "description": "Design cloud solutions using AWS and microservices.", "requirements": ["aws", "microservices", "architecture"]},
+        {"_id": "job5", "title": "Java Backend Developer", "description": "Enterprise backend.", "requirements": ["java", "spring"]}
+      ],
+      "expected_matches": ["job11", "job12", "job22"]
+    },
+    {
+      "name": "SQL/Data Analyst",
+      "resume_text": "Data analyst skilled in SQL, Excel, Tableau, Python, and reporting. Experienced in business intelligence and data visualization, with knowledge of ETL pipelines and data cleaning.",
+      "jobs": [
+        {"_id": "job23", "title": "SQL Data Analyst", "description": "Analyze data using SQL, Tableau, and Excel.", "requirements": ["sql", "tableau", "excel"]},
+        {"_id": "job24", "title": "Business Analyst", "description": "Analyze business metrics using SQL and Python.", "requirements": ["sql", "python", "excel"]},
+        {"_id": "job2", "title": "Data Scientist", "description": "ML using Python.", "requirements": ["python", "scikit-learn"]},
+        {"_id": "job25", "title": "Excel Specialist", "description": "Advanced Excel reporting.", "requirements": ["excel", "vba"]}
+      ],
+      "expected_matches": ["job23", "job24"]
+    }
+  ]
+}

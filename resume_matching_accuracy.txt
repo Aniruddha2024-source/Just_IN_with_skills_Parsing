@@ -1,0 +1,66 @@
+
+====================================================================================================
+FORMATTED RESULTS TABLES
+====================================================================================================
+
+TABLE 1: OVERALL MATCHING STATISTICS
+----------------------------------------------------------------------------------------------------
+                 Metric  Value
+ Total Resumes Analyzed   9544
+Total Matched with Jobs   4404
+         No Match Found    336
+          Matching Rate 46.14%
+    Total Job Positions     50
+
+
+TABLE 2: TOP 15 MOST POPULAR JOB MATCHES
+----------------------------------------------------------------------------------------------------
+ Rank                       Job Title  Matched Resumes Percentage
+    1         Senior Python Developer             2446     55.54%
+    2                  Data Scientist             1540     34.97%
+    3 Full Stack JavaScript Developer              362      8.22%
+    4                 DevOps Engineer               56      1.27%
+
+
+TABLE 3: SIMILARITY SCORE STATISTICS
+----------------------------------------------------------------------------------------------------
+    Statistic  Value
+Average Score 0.1266
+Minimum Score 0.0161
+Maximum Score 0.3541
+ Median Score 0.1124
+      Std Dev 0.0704
+
+
+TABLE 4: ALL 50 JOBS WITH MATCH DISTRIBUTION
+----------------------------------------------------------------------------------------------------
+ Rank                       Job Title  Matched Resumes Percentage
+    1         Senior Python Developer             2446     55.54%
+    2                  Data Scientist             1540     34.97%
+    3 Full Stack JavaScript Developer              362      8.22%
+    4                 DevOps Engineer               56      1.27%
+
+
+TABLE 5: SKILL COUNT DISTRIBUTION (Matched Resumes)
+----------------------------------------------------------------------------------------------------
+               Metric Value
+Average Skills/Resume 17.62
+           Min Skills     0
+           Max Skills   144
+        Median Skills    13
+              Std Dev 15.64
+
+
+====================================================================================================
+✅ ALL TABLES GENERATED SUCCESSFULLY!
+====================================================================================================
+
+Total tables created: 5
+  1. Overall Matching Statistics
+  2. Top 15 Most Popular Job Matches
+  3. Similarity Score Statistics
+  4. All 50 Jobs with Match Distribution
+  5. Skill Count Distribution
+
+====================================================================================================
+

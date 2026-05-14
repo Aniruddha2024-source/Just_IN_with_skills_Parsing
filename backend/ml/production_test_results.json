@@ -1,0 +1,991 @@
+{
+  "summary": {
+    "num_resumes": 25,
+    "micro": {
+      "TP": 73,
+      "FP": 0,
+      "FN": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0
+    },
+    "macro": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0
+    }
+  },
+  "results": [
+    {
+      "id": "resume1",
+      "gold_skills": [
+        "node",
+        "python"
+      ],
+      "predicted_skills": [
+        "node",
+        "python"
+      ],
+      "skill_metrics": {
+        "TP": 2,
+        "FP": 0,
+        "FN": 0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0
+      },
+      "resume_text_length": 140,
+      "job_matches": [
+        {
+          "jobId": "job1",
+          "title": "Backend Developer",
+          "score": 0.3233
+        },
+        {
+          "jobId": "job3",
+          "title": "Full Stack Developer",
+          "score": 0.1813
+        },
+        {
+          "jobId": "job2",
+          "title": "Frontend Developer",
+          "score": 0.0
+        }
+      ]
+    },
+    {
+      "id": "resume2",
+      "gold_skills": [
+        "react",
+        "django"
+      ],
+      "predicted_skills": [
+        "django",
+        "react"
+      ],
+      "skill_metrics": {
+        "TP": 2,
+        "FP": 0,
+        "FN": 0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0
+      },
+      "resume_text_length": 142,
+      "job_matches": [
+        {
+          "jobId": "job1",
+          "title": "Backend Developer",
+          "score": 0.21
+        },
+        {
+          "jobId": "job2",
+          "title": "Frontend Developer",
+          "score": 0.1445
+        },
+        {
+          "jobId": "job3",
+          "title": "Full Stack Developer",
+          "score": 0.1197
+        }
+      ]
+    },
+    {
+      "id": "resume3",
+      "gold_skills": [
+        "react",
+        "django",
+        "sql",
+        "javascript"
+      ],
+      "predicted_skills": [
+        "django",
+        "javascript",
+        "react",
+        "sql"
+      ],
+      "skill_metrics": {
+        "TP": 4,
+        "FP": 0,
+        "FN": 0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0
+      },
+      "resume_text_length": 159,
+      "job_matches": [
+        {
+          "jobId": "job2",
+          "title": "Frontend Developer",
+          "score": 0.2189
+        },
+        {
+          "jobId": "job1",
+          "title": "Backend Developer",
+          "score": 0.2023
+        },
+        {
+          "jobId": "job3",
+          "title": "Full Stack Developer",
+          "score": 0.1923
+        }
+      ]
+    },
+    {
+      "id": "resume4",
+      "gold_skills": [
+        "python",
+        "docker",
+        "javascript"
+      ],
+      "predicted_skills": [
+        "docker",
+        "javascript",
+        "python"
+      ],
+      "skill_metrics": {
+        "TP": 3,
+        "FP": 0,
+        "FN": 0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0
+      },
+      "resume_text_length": 156,
+      "job_matches": [
+        {
+          "jobId": "job1",
+          "title": "Backend Developer",
+          "score": 0.3035
+        },
+        {
+          "jobId": "job2",
+          "title": "Frontend Developer",
+          "score": 0.0657
+        },
+        {
+          "jobId": "job3",
+          "title": "Full Stack Developer",
+          "score": 0.0266
+        }
+      ]
+    },
+    {
+      "id": "resume5",
+      "gold_skills": [
+        "sql",
+        "html"
+      ],
+      "predicted_skills": [
+        "html",
+        "sql"
+      ],
+      "skill_metrics": {
+        "TP": 2,
+        "FP": 0,
+        "FN": 0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0
+      },
+      "resume_text_length": 134,
+      "job_matches": [
+        {
+          "jobId": "job2",
+          "title": "Frontend Developer",
+          "score": 0.1043
+        },
+        {
+          "jobId": "job1",
+          "title": "Backend Developer",
+          "score": 0.1
+        },
+        {
+          "jobId": "job3",
+          "title": "Full Stack Developer",
+          "score": 0.087
+        }
+      ]
+    },
+    {
+      "id": "resume6",
+      "gold_skills": [
+        "docker",
+        "css"
+      ],
+      "predicted_skills": [
+        "css",
+        "docker"
+      ],
+      "skill_metrics": {
+        "TP": 2,
+        "FP": 0,
+        "FN": 0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0
+      },
+      "resume_text_length": 138,
+      "job_matches": [
+        {
+          "jobId": "job2",
+          "title": "Frontend Developer",
+          "score": 0.0991
+        },
+        {
+          "jobId": "job1",
+          "title": "Backend Developer",
+          "score": 0.0951
+        },
+        {
+          "jobId": "job3",
+          "title": "Full Stack Developer",
+          "score": 0.0
+        }
+      ]
+    },
+    {
+      "id": "resume7",
+      "gold_skills": [
+        "docker",
+        "react",
+        "html",
+        "javascript"
+      ],
+      "predicted_skills": [
+        "docker",
+        "html",
+        "javascript",
+        "react"
+      ],
+      "skill_metrics": {
+        "TP": 4,
+        "FP": 0,
+        "FN": 0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0
+      },
+      "resume_text_length": 160,
+      "job_matches": [
+        {
+          "jobId": "job2",
+          "title": "Frontend Developer",
+          "score": 0.2671
+        },
+        {
+          "jobId": "job3",
+          "title": "Full Stack Developer",
+          "score": 0.1382
+        },
+        {
+          "jobId": "job1",
+          "title": "Backend Developer",
+          "score": 0.0945
+        }
+      ]
+    },
+    {
+      "id": "resume8",
+      "gold_skills": [
+        "css",
+        "django",
+        "html",
+        "react"
+      ],
+      "predicted_skills": [
+        "css",
+        "django",
+        "html",
+        "react"
+      ],
+      "skill_metrics": {
+        "TP": 4,
+        "FP": 0,
+        "FN": 0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0
+      },
+      "resume_text_length": 151,
+      "job_matches": [
+        {
+          "jobId": "job2",
+          "title": "Frontend Developer",
+          "score": 0.2318
+        },
+        {
+          "jobId": "job1",
+          "title": "Backend Developer",
+          "score": 0.1966
+        },
+        {
+          "jobId": "job3",
+          "title": "Full Stack Developer",
+          "score": 0.056
+        }
+      ]
+    },
+    {
+      "id": "resume9",
+      "gold_skills": [
+        "docker",
+        "python",
+        "css",
+        "javascript"
+      ],
+      "predicted_skills": [
+        "css",
+        "docker",
+        "javascript",
+        "python"
+      ],
+      "skill_metrics": {
+        "TP": 4,
+        "FP": 0,
+        "FN": 0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0
+      },
+      "resume_text_length": 161,
+      "job_matches": [
+        {
+          "jobId": "job1",
+          "title": "Backend Developer",
+          "score": 0.2978
+        },
+        {
+          "jobId": "job2",
+          "title": "Frontend Developer",
+          "score": 0.116
+        },
+        {
+          "jobId": "job3",
+          "title": "Full Stack Developer",
+          "score": 0.0261
+        }
+      ]
+    },
+    {
+      "id": "resume10",
+      "gold_skills": [
+        "python",
+        "node",
+        "css"
+      ],
+      "predicted_skills": [
+        "css",
+        "node",
+        "python"
+      ],
+      "skill_metrics": {
+        "TP": 3,
+        "FP": 0,
+        "FN": 0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0
+      },
+      "resume_text_length": 146,
+      "job_matches": [
+        {
+          "jobId": "job1",
+          "title": "Backend Developer",
+          "score": 0.3063
+        },
+        {
+          "jobId": "job3",
+          "title": "Full Stack Developer",
+          "score": 0.1718
+        },
+        {
+          "jobId": "job2",
+          "title": "Frontend Developer",
+          "score": 0.0494
+        }
+      ]
+    },
+    {
+      "id": "resume11",
+      "gold_skills": [
+        "html",
+        "docker"
+      ],
+      "predicted_skills": [
+        "docker",
+        "html"
+      ],
+      "skill_metrics": {
+        "TP": 2,
+        "FP": 0,
+        "FN": 0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0
+      },
+      "resume_text_length": 141,
+      "job_matches": [
+        {
+          "jobId": "job2",
+          "title": "Frontend Developer",
+          "score": 0.0961
+        },
+        {
+          "jobId": "job1",
+          "title": "Backend Developer",
+          "score": 0.0922
+        },
+        {
+          "jobId": "job3",
+          "title": "Full Stack Developer",
+          "score": 0.0
+        }
+      ]
+    },
+    {
+      "id": "resume12",
+      "gold_skills": [
+        "node",
+        "javascript",
+        "python"
+      ],
+      "predicted_skills": [
+        "javascript",
+        "node",
+        "python"
+      ],
+      "skill_metrics": {
+        "TP": 3,
+        "FP": 0,
+        "FN": 0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0
+      },
+      "resume_text_length": 157,
+      "job_matches": [
+        {
+          "jobId": "job3",
+          "title": "Full Stack Developer",
+          "score": 0.2365
+        },
+        {
+          "jobId": "job1",
+          "title": "Backend Developer",
+          "score": 0.21
+        },
+        {
+          "jobId": "job2",
+          "title": "Frontend Developer",
+          "score": 0.1364
+        }
+      ]
+    },
+    {
+      "id": "resume13",
+      "gold_skills": [
+        "javascript",
+        "aws",
+        "docker"
+      ],
+      "predicted_skills": [
+        "aws",
+        "docker",
+        "javascript"
+      ],
+      "skill_metrics": {
+        "TP": 3,
+        "FP": 0,
+        "FN": 0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0
+      },
+      "resume_text_length": 155,
+      "job_matches": [
+        {
+          "jobId": "job1",
+          "title": "Backend Developer",
+          "score": 0.1958
+        },
+        {
+          "jobId": "job2",
+          "title": "Frontend Developer",
+          "score": 0.1347
+        },
+        {
+          "jobId": "job3",
+          "title": "Full Stack Developer",
+          "score": 0.0546
+        }
+      ]
+    },
+    {
+      "id": "resume14",
+      "gold_skills": [
+        "javascript",
+        "css",
+        "docker"
+      ],
+      "predicted_skills": [
+        "css",
+        "docker",
+        "javascript"
+      ],
+      "skill_metrics": {
+        "TP": 3,
+        "FP": 0,
+        "FN": 0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0
+      },
+      "resume_text_length": 155,
+      "job_matches": [
+        {
+          "jobId": "job2",
+          "title": "Frontend Developer",
+          "score": 0.2424
+        },
+        {
+          "jobId": "job1",
+          "title": "Backend Developer",
+          "score": 0.0962
+        },
+        {
+          "jobId": "job3",
+          "title": "Full Stack Developer",
+          "score": 0.0546
+        }
+      ]
+    },
+    {
+      "id": "resume15",
+      "gold_skills": [
+        "aws",
+        "sql"
+      ],
+      "predicted_skills": [
+        "aws",
+        "sql"
+      ],
+      "skill_metrics": {
+        "TP": 2,
+        "FP": 0,
+        "FN": 0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0
+      },
+      "resume_text_length": 133,
+      "job_matches": [
+        {
+          "jobId": "job1",
+          "title": "Backend Developer",
+          "score": 0.1968
+        },
+        {
+          "jobId": "job3",
+          "title": "Full Stack Developer",
+          "score": 0.0841
+        },
+        {
+          "jobId": "job2",
+          "title": "Frontend Developer",
+          "score": 0.0
+        }
+      ]
+    },
+    {
+      "id": "resume16",
+      "gold_skills": [
+        "html",
+        "javascript",
+        "django",
+        "react"
+      ],
+      "predicted_skills": [
+        "django",
+        "html",
+        "javascript",
+        "react"
+      ],
+      "skill_metrics": {
+        "TP": 4,
+        "FP": 0,
+        "FN": 0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0
+      },
+      "resume_text_length": 164,
+      "job_matches": [
+        {
+          "jobId": "job2",
+          "title": "Frontend Developer",
+          "score": 0.3265
+        },
+        {
+          "jobId": "job1",
+          "title": "Backend Developer",
+          "score": 0.1467
+        },
+        {
+          "jobId": "job3",
+          "title": "Full Stack Developer",
+          "score": 0.1124
+        }
+      ]
+    },
+    {
+      "id": "resume17",
+      "gold_skills": [
+        "django",
+        "python",
+        "sql"
+      ],
+      "predicted_skills": [
+        "django",
+        "python",
+        "sql"
+      ],
+      "skill_metrics": {
+        "TP": 3,
+        "FP": 0,
+        "FN": 0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0
+      },
+      "resume_text_length": 150,
+      "job_matches": [
+        {
+          "jobId": "job1",
+          "title": "Backend Developer",
+          "score": 0.417
+        },
+        {
+          "jobId": "job3",
+          "title": "Full Stack Developer",
+          "score": 0.0412
+        },
+        {
+          "jobId": "job2",
+          "title": "Frontend Developer",
+          "score": 0.0
+        }
+      ]
+    },
+    {
+      "id": "resume18",
+      "gold_skills": [
+        "sql",
+        "javascript",
+        "react",
+        "aws"
+      ],
+      "predicted_skills": [
+        "aws",
+        "javascript",
+        "react",
+        "sql"
+      ],
+      "skill_metrics": {
+        "TP": 4,
+        "FP": 0,
+        "FN": 0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0
+      },
+      "resume_text_length": 159,
+      "job_matches": [
+        {
+          "jobId": "job2",
+          "title": "Frontend Developer",
+          "score": 0.2117
+        },
+        {
+          "jobId": "job3",
+          "title": "Full Stack Developer",
+          "score": 0.2009
+        },
+        {
+          "jobId": "job1",
+          "title": "Backend Developer",
+          "score": 0.1467
+        }
+      ]
+    },
+    {
+      "id": "resume19",
+      "gold_skills": [
+        "docker",
+        "javascript"
+      ],
+      "predicted_skills": [
+        "docker",
+        "javascript"
+      ],
+      "skill_metrics": {
+        "TP": 2,
+        "FP": 0,
+        "FN": 0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0
+      },
+      "resume_text_length": 153,
+      "job_matches": [
+        {
+          "jobId": "job2",
+          "title": "Frontend Developer",
+          "score": 0.1325
+        },
+        {
+          "jobId": "job1",
+          "title": "Backend Developer",
+          "score": 0.0946
+        },
+        {
+          "jobId": "job3",
+          "title": "Full Stack Developer",
+          "score": 0.0537
+        }
+      ]
+    },
+    {
+      "id": "resume20",
+      "gold_skills": [
+        "aws",
+        "sql",
+        "docker"
+      ],
+      "predicted_skills": [
+        "aws",
+        "docker",
+        "sql"
+      ],
+      "skill_metrics": {
+        "TP": 3,
+        "FP": 0,
+        "FN": 0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0
+      },
+      "resume_text_length": 141,
+      "job_matches": [
+        {
+          "jobId": "job1",
+          "title": "Backend Developer",
+          "score": 0.1906
+        },
+        {
+          "jobId": "job3",
+          "title": "Full Stack Developer",
+          "score": 0.0815
+        },
+        {
+          "jobId": "job2",
+          "title": "Frontend Developer",
+          "score": 0.0
+        }
+      ]
+    },
+    {
+      "id": "resume21",
+      "gold_skills": [
+        "react",
+        "javascript"
+      ],
+      "predicted_skills": [
+        "javascript",
+        "react"
+      ],
+      "skill_metrics": {
+        "TP": 2,
+        "FP": 0,
+        "FN": 0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0
+      },
+      "resume_text_length": 151,
+      "job_matches": [
+        {
+          "jobId": "job2",
+          "title": "Frontend Developer",
+          "score": 0.3013
+        },
+        {
+          "jobId": "job3",
+          "title": "Full Stack Developer",
+          "score": 0.1799
+        },
+        {
+          "jobId": "job1",
+          "title": "Backend Developer",
+          "score": 0.1026
+        }
+      ]
+    },
+    {
+      "id": "resume22",
+      "gold_skills": [
+        "css",
+        "react"
+      ],
+      "predicted_skills": [
+        "css",
+        "react"
+      ],
+      "skill_metrics": {
+        "TP": 2,
+        "FP": 0,
+        "FN": 0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0
+      },
+      "resume_text_length": 137,
+      "job_matches": [
+        {
+          "jobId": "job2",
+          "title": "Frontend Developer",
+          "score": 0.2507
+        },
+        {
+          "jobId": "job3",
+          "title": "Full Stack Developer",
+          "score": 0.1154
+        },
+        {
+          "jobId": "job1",
+          "title": "Backend Developer",
+          "score": 0.0995
+        }
+      ]
+    },
+    {
+      "id": "resume23",
+      "gold_skills": [
+        "react",
+        "node",
+        "css"
+      ],
+      "predicted_skills": [
+        "css",
+        "node",
+        "react"
+      ],
+      "skill_metrics": {
+        "TP": 3,
+        "FP": 0,
+        "FN": 0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0
+      },
+      "resume_text_length": 144,
+      "job_matches": [
+        {
+          "jobId": "job3",
+          "title": "Full Stack Developer",
+          "score": 0.3024
+        },
+        {
+          "jobId": "job2",
+          "title": "Frontend Developer",
+          "score": 0.1923
+        },
+        {
+          "jobId": "job1",
+          "title": "Backend Developer",
+          "score": 0.0974
+        }
+      ]
+    },
+    {
+      "id": "resume24",
+      "gold_skills": [
+        "django",
+        "aws",
+        "node",
+        "react"
+      ],
+      "predicted_skills": [
+        "aws",
+        "django",
+        "node",
+        "react"
+      ],
+      "skill_metrics": {
+        "TP": 4,
+        "FP": 0,
+        "FN": 0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0
+      },
+      "resume_text_length": 152,
+      "job_matches": [
+        {
+          "jobId": "job1",
+          "title": "Backend Developer",
+          "score": 0.2909
+        },
+        {
+          "jobId": "job3",
+          "title": "Full Stack Developer",
+          "score": 0.1452
+        },
+        {
+          "jobId": "job2",
+          "title": "Frontend Developer",
+          "score": 0.0655
+        }
+      ]
+    },
+    {
+      "id": "resume25",
+      "gold_skills": [
+        "docker",
+        "node",
+        "python"
+      ],
+      "predicted_skills": [
+        "docker",
+        "node",
+        "python"
+      ],
+      "skill_metrics": {
+        "TP": 3,
+        "FP": 0,
+        "FN": 0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0
+      },
+      "resume_text_length": 149,
+      "job_matches": [
+        {
+          "jobId": "job1",
+          "title": "Backend Developer",
+          "score": 0.1951
+        },
+        {
+          "jobId": "job3",
+          "title": "Full Stack Developer",
+          "score": 0.1641
+        },
+        {
+          "jobId": "job2",
+          "title": "Frontend Developer",
+          "score": 0.0
+        }
+      ]
+    }
+  ]
+}

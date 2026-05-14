@@ -3,3 +3,4 @@ numpy>=1.21
 scipy>=1.7
 pdfminer.six>=20200726
 python-docx>=0.8.11
+spacy>=3.7.2

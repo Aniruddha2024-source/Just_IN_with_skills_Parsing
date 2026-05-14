@@ -1,6 +1,17 @@
 import { Job } from "../models/job.model.js";
+import { JobAnalysis } from "../models/jobAnalysis.model.js";
 import { User } from '../models/user.model.js';
 import { notifyUsersAboutNewJob } from '../services/jobMatchingService.js';
+import JobRecommendationService from '../services/jobRecommendationService.js';
+import { spawn } from 'child_process';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+// Python 3.13 executable path (for Spacy ML integration)
+const PYTHON_EXECUTABLE = 'C:\\Users\\aniru\\AppData\\Local\\Programs\\Python\\Python313\\python.exe';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 
 // admin post krega job
@@ -49,6 +60,29 @@ export const postJob = async (req, res) => {
       requirements, // ✅ No .split() needed
       created_by: req.user._id,
     });
+
+    // Extract skills from job description using Spacy NLP asynchronously
+    extractJobSkillsAsync(job, title, description, requirements, company)
+      .then(analysis => {
+        console.log(`Job skills extracted for ${job._id}:`, analysis?.extractedSkills?.length || 0, 'skills found');
+        
+        // After skills are extracted, send SBERT-based recommendations
+        if (analysis?.extractedSkills && analysis.extractedSkills.length > 0) {
+          JobRecommendationService.sendRecommendationsForNewJob(job._id)
+            .then(result => {
+              console.log(`✅ SBERT recommendations sent for job ${job._id}:`, {
+                emailsSent: result.sent,
+                failed: result.failed
+              });
+            })
+            .catch(err => {
+              console.error(`Error sending SBERT recommendations for ${job._id}:`, err.message);
+            });
+        }
+      })
+      .catch(err => {
+        console.error(`Error extracting job skills for ${job._id}:`, err.message);
+      });
 
     // Trigger job matching and notifications asynchronously
     notifyUsersAboutNewJob(job._id)
@@ -320,3 +354,234 @@ export const unsaveJob = async (req, res) => {
   }
 };
 
+/**
+ * Extract skills from job description using Spacy NLP
+ * Runs asynchronously without blocking the API response
+ */
+const extractJobSkillsAsync = async (job, jobTitle, jobDescription, requirements, companyId) => {
+  try {
+    // Prepare combined text for skill extraction
+    const combinedText = `
+      Job Title: ${jobTitle}
+      
+      Description: ${jobDescription}
+      
+      Requirements: ${Array.isArray(requirements) ? requirements.join(', ') : requirements}
+    `;
+
+    // Prepare input for Spacy extractor
+    const spacyInput = JSON.stringify({
+      id: job._id.toString(),
+      text: combinedText
+    });
+
+    // Path to Spacy skill extractor
+    const spacyExtractorPath = path.normalize(path.join(process.cwd(), 'ml', 'spacy_skill_extractor.py'));
+
+    console.log(`Starting skill extraction for job: ${job._id} (${jobTitle})`);
+
+    const spacyPy = spawn(PYTHON_EXECUTABLE, [spacyExtractorPath], { 
+      stdio: ['pipe', 'pipe', 'pipe'],
+      timeout: 30000 
+    });
+
+    let spacyOut = '';
+    let spacyErr = '';
+
+    spacyPy.stdin.write(spacyInput + '\n');
+    spacyPy.stdin.end();
+
+    spacyPy.stdout.on('data', (d) => { spacyOut += d.toString(); });
+    spacyPy.stderr.on('data', (d) => { spacyErr += d.toString(); });
+
+    const spacyExitCode = await new Promise((resolve) => spacyPy.on('close', resolve));
+
+    let jobAnalysis = {
+      job: job._id,
+      company: companyId,
+      jobTitle: jobTitle,
+      jobDescription: jobDescription,
+      requirementsList: Array.isArray(requirements) ? requirements : [requirements],
+      extractedSkills: [],
+      entities: {},
+      confidence: 0.95,
+      skillCount: 0,
+      extractorUsed: 'spacy-nlp'
+    };
+
+    if (spacyExitCode === 0) {
+      try {
+        const lines = spacyOut.trim().split('\n');
+        
+        for (const line of lines) {
+          if (!line.trim()) continue;
+          
+          try {
+            const parsed = JSON.parse(line);
+            if (parsed.predicted && Array.isArray(parsed.predicted)) {
+              jobAnalysis.extractedSkills = parsed.predicted;
+              jobAnalysis.skillCount = parsed.predicted.length;
+              jobAnalysis.confidence = parsed.confidence || 0.95;
+
+              // Extract entities if available
+              if (parsed.entities) {
+                jobAnalysis.entities = {
+                  TECHNOLOGY: parsed.entities.TECHNOLOGY || [],
+                  FRAMEWORK: parsed.entities.FRAMEWORK || [],
+                  DATABASE: parsed.entities.DATABASE || [],
+                  CLOUD: parsed.entities.CLOUD || [],
+                  DEVOPS: parsed.entities.DEVOPS || [],
+                  LANGUAGE: parsed.entities.LANGUAGE || [],
+                  TOOL: parsed.entities.TOOL || [],
+                  METHODOLOGY: parsed.entities.METHODOLOGY || []
+                };
+              }
+            }
+          } catch (parseErr) {
+            console.error('Error parsing skill extraction output:', parseErr.message);
+          }
+        }
+
+        console.log(`Extracted ${jobAnalysis.skillCount} skills for job: ${job._id}`);
+      } catch (err) {
+        console.error('Error processing Spacy output:', err);
+        // Fall back to empty skills
+        jobAnalysis.extractorUsed = 'rule-based';
+        jobAnalysis.extractedSkills = [];
+      }
+    } else {
+      console.error(`Spacy extractor failed with exit code ${spacyExitCode}:`, spacyErr);
+      // Fall back to rule-based extraction
+      jobAnalysis.extractorUsed = 'rule-based';
+      jobAnalysis.extractedSkills = extractSkillsRuleBased(combinedText);
+    }
+
+    // Save to MongoDB
+    const savedAnalysis = await JobAnalysis.findOneAndUpdate(
+      { job: job._id },
+      jobAnalysis,
+      { upsert: true, new: true }
+    );
+
+    console.log(`✓ Job analysis saved for ${job._id} with ${jobAnalysis.skillCount} skills`);
+    return savedAnalysis;
+
+  } catch (error) {
+    console.error('Error in extractJobSkillsAsync:', error);
+    // Continue without throwing - skill extraction failure should not block job posting
+    return null;
+  }
+};
+
+/**
+ * Rule-based skill extraction fallback
+ * Used when Spacy processing fails
+ */
+const extractSkillsRuleBased = (text) => {
+  const skillKeywords = [
+    'Python', 'JavaScript', 'TypeScript', 'Java', 'C++', 'C#', 'Go', 'Rust',
+    'React', 'Vue', 'Angular', 'Node.js', 'Django', 'FastAPI', 'Flask',
+    'MongoDB', 'PostgreSQL', 'MySQL', 'Redis', 'Elasticsearch',
+    'AWS', 'Azure', 'Google Cloud', 'Docker', 'Kubernetes',
+    'Git', 'CI/CD', 'Jenkins', 'GitHub Actions', 'GitLab CI',
+    'Machine Learning', 'TensorFlow', 'PyTorch', 'Scikit-Learn',
+    'REST API', 'GraphQL', 'WebSocket', 'Microservices',
+    'Agile', 'Scrum', 'Project Management', 'Team Lead',
+    'Communication', 'Problem Solving', 'Critical Thinking'
+  ];
+
+  const foundSkills = new Set();
+  const lowerText = text.toLowerCase();
+
+  for (const skill of skillKeywords) {
+    if (lowerText.includes(skill.toLowerCase())) {
+      foundSkills.add(skill);
+    }
+  }
+
+  return Array.from(foundSkills);
+};
+
+export const getJobAnalysis = async (req, res) => {
+  try {
+    const { jobId } = req.params;
+    
+    const analysis = await JobAnalysis.findOne({ job: jobId });
+    
+    if (!analysis) {
+      return res.status(404).json({
+        success: false,
+        message: 'Job analysis not found'
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      data: analysis
+    });
+  } catch (error) {
+    console.error('Error fetching job analysis:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error fetching job analysis'
+    });
+  }
+};
+
+// Get job recommendations for current user based on SBERT skill matching
+export const getJobRecommendations = async (req, res) => {
+  try {
+    const userId = req.user._id;
+    const { threshold } = req.query;
+    const matchThreshold = threshold ? parseInt(threshold) : 50;
+
+    const recommendations = await JobRecommendationService.findMatchingJobsForUser(
+      userId,
+      matchThreshold
+    );
+
+    res.status(200).json({
+      success: true,
+      count: recommendations.length,
+      matchThreshold: matchThreshold,
+      recommendations: recommendations
+    });
+  } catch (error) {
+    console.error('Error fetching job recommendations:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error fetching job recommendations'
+    });
+  }
+};
+
+// Manually send recommendations for a user
+export const sendUserRecommendations = async (req, res) => {
+  try {
+    const userId = req.user._id;
+
+    const recommendations = await JobRecommendationService.findMatchingJobsForUser(userId, 50);
+    
+    if (recommendations.length === 0) {
+      return res.status(200).json({
+        success: true,
+        message: 'No matching jobs found at this time',
+        count: 0
+      });
+    }
+
+    const emailSent = await JobRecommendationService.sendJobRecommendationEmail(userId, recommendations);
+
+    res.status(200).json({
+      success: emailSent,
+      message: emailSent ? `Recommendation email sent with ${recommendations.length} job(s)` : 'Failed to send email',
+      jobsMatched: recommendations.length
+    });
+  } catch (error) {
+    console.error('Error sending recommendations:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error sending recommendations'
+    });
+  }
+};

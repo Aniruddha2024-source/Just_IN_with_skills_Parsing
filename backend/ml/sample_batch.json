@@ -1,0 +1,128 @@
+[
+  {
+    "id": "resume1",
+    "text": "Experienced Python developer with 5 years in Django, Flask, PostgreSQL, and AWS cloud solutions. Worked on containerization using Docker and built ML models with TensorFlow and scikit-learn.",
+    "gold": ["python", "django", "flask", "postgresql", "aws", "docker", "machine learning", "tensorflow", "scikit-learn"]
+  },
+  {
+    "id": "resume2",
+    "text": "Full-stack JavaScript developer skilled in ReactJS, Node.js, Express, MongoDB, HTML5, CSS3, and Git version control. Familiar with webpack and CI/CD pipelines.",
+    "gold": ["javascript", "react", "node", "express", "mongodb", "html", "css", "git", "ci/cd"]
+  },
+  {
+    "id": "resume3",
+    "text": "Java backend engineer with experience in Spring Boot, Hibernate, PostgreSQL, Kubernetes, and Azure cloud services. Designed scalable microservices architecture.",
+    "gold": ["java", "spring boot", "hibernate", "postgresql", "kubernetes", "azure", "microservices"]
+  },
+  {
+    "id": "resume4",
+    "text": "Data scientist specializing in Python, pandas, numpy, scikit-learn, TensorFlow, and data visualization using matplotlib and seaborn. Worked on SQL databases for analytics.",
+    "gold": ["python", "pandas", "numpy", "scikit-learn", "tensorflow", "matplotlib", "seaborn", "sql", "data analysis"]
+  },
+  {
+    "id": "resume5",
+    "text": "DevOps engineer skilled in Docker, Kubernetes, AWS, Terraform, CI/CD pipelines, and Jenkins. Experience managing cloud infrastructure and automation scripts.",
+    "gold": ["docker", "kubernetes", "aws", "terraform", "ci/cd", "jenkins"]
+  },
+  {
+    "id": "resume6",
+    "text": "Frontend developer with strong skills in HTML, CSS, JavaScript, React, Redux, and responsive web design. Familiar with REST APIs and Git.",
+    "gold": ["html", "css", "javascript", "react", "redux", "rest api", "git"]
+  },
+  {
+    "id": "resume7",
+    "text": "Machine learning engineer proficient in Python, TensorFlow, PyTorch, scikit-learn, and pandas. Built recommendation systems and predictive models.",
+    "gold": ["python", "tensorflow", "pytorch", "scikit-learn", "pandas", "machine learning"]
+  },
+  {
+    "id": "resume8",
+    "text": "JavaScript developer with Node.js, Express, React, MongoDB, and Git experience. Worked on backend APIs and cloud deployment on AWS.",
+    "gold": ["javascript", "node", "express", "react", "mongodb", "git", "aws"]
+  },
+  {
+    "id": "resume9",
+    "text": "Senior Python developer experienced in Django, REST APIs, PostgreSQL, Docker, AWS, and cloud deployment. Developed web applications and data pipelines.",
+    "gold": ["python", "django", "rest api", "postgresql", "docker", "aws", "cloud"]
+  },
+  {
+    "id": "resume10",
+    "text": "QA engineer with experience in Selenium, Python, Java, manual testing, and automation frameworks. Familiar with Jenkins and Git.",
+    "gold": ["selenium", "python", "java", "manual testing", "automation", "jenkins", "git"]
+  },
+  {
+    "id": "resume11",
+    "text": "Cloud solutions architect with expertise in AWS, Azure, Docker, Kubernetes, Terraform, and CI/CD pipelines.",
+    "gold": ["aws", "azure", "docker", "kubernetes", "terraform", "ci/cd"]
+  },
+  {
+    "id": "resume12",
+    "text": "Data analyst skilled in SQL, Python, Excel, Tableau, and Power BI. Experience analyzing large datasets and generating business insights.",
+    "gold": ["sql", "python", "excel", "tableau", "power bi", "data analysis"]
+  },
+  {
+    "id": "resume13",
+    "text": "Mobile app developer with expertise in Flutter, Dart, React Native, and Android development. Familiar with Firebase and REST APIs.",
+    "gold": ["flutter", "dart", "react native", "android", "firebase", "rest api"]
+  },
+  {
+    "id": "resume14",
+    "text": "Backend developer skilled in Node.js, Express, MongoDB, and cloud deployment on AWS. Experience building REST APIs and microservices.",
+    "gold": ["node", "express", "mongodb", "aws", "rest api", "microservices"]
+  },
+  {
+    "id": "resume15",
+    "text": "Python developer working with Django, Flask, SQL, AWS, Docker, and machine learning libraries like TensorFlow and scikit-learn.",
+    "gold": ["python", "django", "flask", "sql", "aws", "docker", "tensorflow", "scikit-learn", "machine learning"]
+  },
+  {
+    "id": "resume16",
+    "text": "Frontend engineer experienced in HTML, CSS, JavaScript, React, Redux, and responsive design. Worked with REST APIs and Git version control.",
+    "gold": ["html", "css", "javascript", "react", "redux", "rest api", "git"]
+  },
+  {
+    "id": "resume17",
+    "text": "DevOps professional skilled in Docker, Kubernetes, AWS, Terraform, Jenkins, and CI/CD pipelines. Experience with cloud automation and monitoring.",
+    "gold": ["docker", "kubernetes", "aws", "terraform", "jenkins", "ci/cd", "cloud automation"]
+  },
+  {
+    "id": "resume18",
+    "text": "Machine learning researcher proficient in Python, TensorFlow, PyTorch, pandas, scikit-learn, and data visualization libraries like matplotlib and seaborn.",
+    "gold": ["python", "tensorflow", "pytorch", "pandas", "scikit-learn", "matplotlib", "seaborn", "machine learning"]
+  },
+  {
+    "id": "resume19",
+    "text": "Java backend developer experienced in Spring Boot, Hibernate, PostgreSQL, microservices, and Docker containers. Familiar with Kubernetes and cloud deployment.",
+    "gold": ["java", "spring boot", "hibernate", "postgresql", "microservices", "docker", "kubernetes", "cloud"]
+  },
+  {
+    "id": "resume20",
+    "text": "Full-stack developer skilled in React, Node.js, Express, MongoDB, JavaScript, HTML, CSS, and Git. Experience with CI/CD pipelines and Docker deployment.",
+    "gold": ["react", "node", "express", "mongodb", "javascript", "html", "css", "git", "ci/cd", "docker"]
+  },
+  {
+    "id": "resume21",
+    "text": "Data engineer experienced in Python, SQL, PostgreSQL, ETL pipelines, AWS, and Apache Spark for big data processing.",
+    "gold": ["python", "sql", "postgresql", "etl", "aws", "apache spark", "data engineering"]
+  },
+  {
+    "id": "resume22",
+    "text": "QA automation engineer skilled in Selenium, Java, Python, Jenkins, Git, and automated test frameworks.",
+    "gold": ["selenium", "java", "python", "jenkins", "git", "automation"]
+  },
+  {
+    "id": "resume23",
+    "text": "Cloud engineer with expertise in AWS, Azure, Docker, Kubernetes, Terraform, and cloud monitoring tools.",
+    "gold": ["aws", "azure", "docker", "kubernetes", "terraform", "cloud monitoring"]
+  },
+  {
+    "id": "resume24",
+    "text": "Mobile developer with experience in React Native, Flutter, Android, Firebase, and REST API integrations.",
+    "gold": ["react native", "flutter", "android", "firebase", "rest api"]
+  },
+  {
+    "id": "resume25",
+    "text": "SQL/Data analyst skilled in SQL, Python, Excel, Tableau, and Power BI. Experienced in data cleaning, visualization, and reporting.",
+    "gold": ["sql", "python", "excel", "tableau", "power bi", "data analysis"]
+  }
+]
+

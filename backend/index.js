@@ -25,7 +25,8 @@ app.use(express.json());
 app.use(express.urlencoded({extended:true}));
 app.use(cookieParser());
 const corsOptions = {
-    origin:['https://just-in-with-skills-parsing-5.onrender.com'],
+    origin:['http://localhost:5173',
+    'http://192.168.1.5:5173'],
     credentials:true
 }
 

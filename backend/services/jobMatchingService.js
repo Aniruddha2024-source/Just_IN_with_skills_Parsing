@@ -40,57 +40,58 @@ const calculateMatchScore = (userSkills, jobRequirements) => {
 export const findMatchingJobsForUser = async (user, minMatchPercentage = 30) => {
   try {
     // Ensure user has skills
-    if (!user.profile?.skills || user.profile.skills.length === 0) {
-      // No explicit skills in profile — we'll still attempt a match using bio or resume text
-      // by passing whatever text is available to the Python matcher. If nothing is available,
-      // fall back to returning no matches.
-      // proceed — will build resume_text below
+    const userSkills = user.profile?.skills || [];
+    if (userSkills.length === 0) {
+      console.log('User has no skills, returning empty matches');
+      return [];
     }
 
     // Get all active jobs
     const allJobs = await Job.find({}).populate('company');
-
-    // Attempt to use Python TF-IDF matcher if available. Build a short resume_text from
-    // profile.skills (preferred), or profile.bio, otherwise empty.
-    const resumeText = (user.profile?.skills && user.profile.skills.length > 0)
-      ? user.profile.skills.join(' ')
-      : (user.profile?.bio || '');
+    if (!allJobs || allJobs.length === 0) {
+      return [];
+    }
 
     try {
-      const pythonMatches = await callPythonMatcher(resumeText, allJobs, 50);
-      console.log('Python matcher returned', Array.isArray(pythonMatches) ? pythonMatches.length : 0, 'matches');
-      if (pythonMatches && pythonMatches.length > 0) {
-        // log full python results for debugging (trim large text)
-        try { console.debug('pythonMatches sample:', JSON.stringify(pythonMatches.slice(0,10))); } catch(e){}
-        // Map python results back to job objects and compute percentage-like scores
-        const mapped = pythonMatches.map(m => {
+      // Use SBERT matcher with resume skills (semantic skill matching)
+      console.log(`Calling SBERT matcher for user with ${userSkills.length} skills against ${allJobs.length} jobs`);
+      const sbertMatches = await callPythonMatcher(userSkills, allJobs, 50);
+      
+      console.log('SBERT matcher returned', Array.isArray(sbertMatches) ? sbertMatches.length : 0, 'matches');
+      if (sbertMatches && sbertMatches.length > 0) {
+        // Log SBERT results for debugging
+        try { console.debug('SBERT matches sample:', JSON.stringify(sbertMatches.slice(0, 5).map(m => ({ title: m.title, matchPercentage: m.matchPercentage })))); } catch(e){}
+        
+        // Map SBERT results to job objects with match percentages
+        const mapped = sbertMatches.map(m => {
           const job = allJobs.find(j => String(j._id) === String(m.jobId));
           return {
             job,
-            score: (m.score || 0) * 100, // convert 0..1 to percentage for compatibility
-            matchingSkills: []
+            score: m.matchPercentage || ((m.score || 0) * 100), // Use match percentage or convert score to percentage
+            matchingSkills: m.matches || [],
+            totalMatches: m.totalMatches || 0
           };
         }).filter(x => x.job);
 
-        // If nothing survives the percentage threshold, log for debugging
+        // Filter jobs that meet the minimum match percentage
         const filtered = mapped.filter(match => match.score >= minMatchPercentage)
           .sort((a, b) => b.score - a.score);
 
         if (filtered.length === 0) {
-          console.log(`No python matches passed the minMatchPercentage=${minMatchPercentage}.`);
-          console.log('Mapped top results (before filtering):', mapped.slice(0,10));
+          console.log(`No SBERT matches passed the minMatchPercentage=${minMatchPercentage}. Top mapped results:`, mapped.slice(0, 5).map(m => ({ title: m.job?.title, score: m.score })));
         }
 
         return filtered;
       }
     } catch (err) {
-      console.warn('Python matcher failed, falling back to JS matching:', err.message || err);
+      console.warn('SBERT matcher failed, falling back to JS matching:', err.message || err);
       // fall through to JS matching
     }
 
-    // Fallback: Calculate match scores for each job using existing include-match logic
+    // Fallback: Calculate match scores for each job using JavaScript matching
+    console.log('Using fallback JS matching logic');
     const matchingJobs = allJobs.map(job => {
-      const { score, matchingSkills } = calculateMatchScore(user.profile?.skills || [], job.requirements);
+      const { score, matchingSkills } = calculateMatchScore(userSkills, job.requirements);
 
       return {
         job,
@@ -112,17 +113,18 @@ export const findMatchingJobsForUser = async (user, minMatchPercentage = 30) => 
 
 
 /**
- * Call the Python TF-IDF matcher (backend/ml/matcher.py) via stdin/stdout.
- * Input: resume_text (string), jobs (array of job objects), top_n
- * Returns array of matches from Python or throws on error.
+ * Call the Python SBERT Skill Matcher (backend/ml/sbert_skill_matcher.py) via stdin/stdout.
+ * Matches resume skills with job requirements using semantic similarity.
+ * Input: resume_skills (array), jobs (array of job objects with requirements)
+ * Returns array of jobs ranked by skill match percentage.
  */
-const callPythonMatcher = (resumeText, jobs, top_n = 10) => {
+const callPythonMatcher = (resumeSkills = [], jobs, top_n = 10) => {
   return new Promise((resolve, reject) => {
     try {
   // Resolve script path from process.cwd(). If server is started from backend/ folder,
-  // process.cwd() already points to backend, so use 'ml/matcher.py' relative to CWD.
-  const scriptPath = path.normalize(path.join(process.cwd(), 'ml', 'matcher.py'));
-  console.log('Calling python matcher at', scriptPath);
+  // process.cwd() already points to backend, so use 'ml/sbert_skill_matcher.py' relative to CWD.
+  const scriptPath = path.normalize(path.join(process.cwd(), 'ml', 'sbert_skill_matcher.py'));
+  console.log('Calling SBERT matcher at', scriptPath);
 
   const py = spawn('python', [scriptPath], { stdio: ['pipe', 'pipe', 'pipe'] });
 
@@ -147,22 +149,51 @@ const callPythonMatcher = (resumeText, jobs, top_n = 10) => {
           } catch (e) {
             // ignore parse
           }
-          return reject(new Error(`Python matcher exited with code ${code}. Stderr: ${stderr}`));
+          return reject(new Error(`SBERT matcher exited with code ${code}. Stderr: ${stderr}`));
         }
 
         try {
-          const parsed = JSON.parse(stdout || '{}');
-          if (parsed && parsed.matches) {
-            return resolve(parsed.matches);
+          // Parse SBERT output line by line (process may output multiple matches)
+          const lines = stdout.trim().split('\n').filter(l => l.trim());
+          const matchResults = [];
+          
+          for (const line of lines) {
+            const parsed = JSON.parse(line);
+            if (parsed && parsed.match_percentage !== undefined) {
+              matchResults.push(parsed);
+            }
           }
-          return resolve([]);
+          
+          // Convert SBERT results to job match format for compatibility
+          const jobMatches = matchResults.map((result, idx) => {
+            const job = jobs[idx];
+            return {
+              jobId: job._id,
+              title: job.title,
+              score: result.match_percentage / 100, // Convert percentage back to 0-1
+              matchPercentage: result.match_percentage,
+              matches: result.matches || [],
+              totalMatches: result.total_matches || 0
+            };
+          }).filter(m => m.jobId); // Only include results with valid jobs
+          
+          return resolve(jobMatches);
         } catch (e) {
-          return reject(new Error('Failed to parse Python matcher output: ' + e.message + ' stdout:' + stdout + ' stderr:' + stderr));
+          return reject(new Error('Failed to parse SBERT matcher output: ' + e.message + ' stdout:' + stdout + ' stderr:' + stderr));
         }
       });
 
-      const input = JSON.stringify({ resume_text: resumeText || '', jobs: jobs.map(j => ({ _id: j._id, title: j.title, description: j.description, requirements: j.requirements })), top_n });
-      py.stdin.write(input);
+      // Build input: for each job, match resume skills against job requirements
+      const matcherInputs = jobs.map(job => ({
+        resume_skills: resumeSkills || [],
+        job_skills: job.requirements || [],
+        threshold: 0.5 // SBERT similarity threshold
+      }));
+
+      // Send each match request to SBERT (one per line for streaming processing)
+      matcherInputs.forEach(input => {
+        py.stdin.write(JSON.stringify(input) + '\n');
+      });
       py.stdin.end();
     } catch (err) {
       return reject(err);

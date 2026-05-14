@@ -513,6 +513,9 @@ const UpdateProfileDialog = ({ open, setOpen }) => {
     skills: user?.profile?.skills?.join(", ") || "",
     file: null,
   });
+  const [analysisId, setAnalysisId] = useState(null);
+  const [predictedSkills, setPredictedSkills] = useState([]);
+  const [confirming, setConfirming] = useState(false);
 
   const changeHandler = (e) => {
     setInput({ ...input, [e.target.name]: e.target.value });
@@ -557,11 +560,52 @@ const UpdateProfileDialog = ({ open, setOpen }) => {
       if (res.data.success) {
         dispatch(setUser(res.data.user));
         toast.success(res.data.message);
-        setOpen(false);
+        // If server created a resume analysis, backend attaches `lastResumeAnalysis` to profile
+        const lastAnalysis = res.data.user?.profile?.lastResumeAnalysis;
+        if (lastAnalysis) {
+          // keep dialog open and load predicted skills for confirmation
+          setAnalysisId(lastAnalysis);
+          fetchAnalysisAndSet(lastAnalysis);
+        } else {
+          setOpen(false);
+        }
       }
     } catch (err) {
       console.error(err);
       toast.error(err.response?.data?.message || "Failed to update profile");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchAnalysisAndSet = async (id) => {
+    try {
+      const r = await axios.get(`${USER_API_END_POINT}/profile/resume-analysis/${id}`, { withCredentials: true });
+      if (r.data?.success && r.data.analysis) {
+        setPredictedSkills(r.data.analysis.predicted || []);
+        setConfirming(true);
+      }
+    } catch (e) {
+      console.error('Failed to fetch analysis', e);
+    }
+  };
+
+  const confirmHandler = async () => {
+    try {
+      setLoading(true);
+      // allow user to edit predicted skills via input field (join/parse)
+      const body = { analysisId, confirmed: predictedSkills };
+      const r = await axios.post(`${USER_API_END_POINT}/profile/confirm-skills`, body, { withCredentials: true });
+      if (r.data?.success) {
+        toast.success('Skills confirmed. Thank you!');
+        // Update user in store with confirmed skills (optional: merge)
+        // Close dialog after confirm
+        setConfirming(false);
+        setOpen(false);
+      }
+    } catch (e) {
+      console.error('Confirm skills failed', e);
+      toast.error('Failed to confirm skills');
     } finally {
       setLoading(false);
     }
@@ -591,6 +635,19 @@ const UpdateProfileDialog = ({ open, setOpen }) => {
                 className="col-span-3"
               />
             </div>
+            {confirming && (
+              <div className="col-span-4 mt-2">
+                <Label className="text-left">Predicted skills (edit if needed)</Label>
+                <Input
+                  value={predictedSkills.join(', ')}
+                  onChange={(e) => setPredictedSkills(e.target.value.split(',').map(s => s.trim()).filter(Boolean))}
+                />
+                <div className="flex gap-2 mt-2">
+                  <Button type="button" onClick={confirmHandler} className="bg-green-600">Confirm Skills</Button>
+                  <Button type="button" onClick={() => { setConfirming(false); setOpen(false); }}>Skip</Button>
+                </div>
+              </div>
+            )}
           </div>
           <DialogFooter>
             <Button type="submit" className="w-full my-4" disabled={loading}>

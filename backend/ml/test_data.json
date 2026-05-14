@@ -1,0 +1,23 @@
+{
+  "resumes": [
+    {
+      "id": "resume1",
+      "file": "test_resume.txt",
+      "gold_skills": ["python", "javascript", "aws"]
+    }
+  ],
+  "jobs": [
+    {
+      "_id": "job1",
+      "title": "Backend Developer",
+      "description": "We need a Python developer with cloud experience",
+      "requirements": ["python", "django", "aws"]
+    },
+    {
+      "_id": "job2",
+      "title": "Frontend Developer",
+      "description": "JavaScript and React expert needed",
+      "requirements": ["javascript", "react", "html", "css"]
+    }
+  ]
+}

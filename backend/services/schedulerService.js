@@ -1,5 +1,6 @@
 import cron from 'node-cron';
 import { sendJobRecommendationsToAllUsers } from './jobMatchingService.js';
+import JobRecommendationService from './jobRecommendationService.js';
 
 /**
  * Initialize all scheduled tasks
@@ -14,6 +15,21 @@ export const initScheduledTasks = () => {
       console.log('Daily job matching completed:', result);
     } catch (error) {
       console.error('Error in daily job matching task:', error);
+    }
+  });
+
+  // Schedule SBERT-based job recommendations at 10:00 AM daily
+  cron.schedule('0 10 * * *', async () => {
+    console.log('🤖 Running SBERT-based job recommendations...');
+    try {
+      const result = await JobRecommendationService.runDailyRecommendations();
+      console.log('✅ SBERT recommendations completed:', {
+        emailsSent: result.emailsSent,
+        totalProcessed: result.totalUsersProcessed,
+        successRate: result.successRate
+      });
+    } catch (error) {
+      console.error('❌ Error in SBERT recommendations:', error);
     }
   });
 

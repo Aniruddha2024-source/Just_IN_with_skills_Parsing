@@ -1,4 +1,6 @@
 import { User } from "../models/user.model.js";
+import { ResumeAnalysis } from "../models/resumeAnalysis.model.js";
+import { computeSkillMetrics } from "../services/skillEvaluationService.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import getDataUri from "../utils/datauri.js";
@@ -8,6 +10,9 @@ import { writeFile, unlink } from 'fs/promises';
 import os from 'os';
 import { spawn } from 'child_process';
 import path from 'path';
+
+// Python 3.13 executable path (for Spacy ML integration)
+const PYTHON_EXECUTABLE = 'C:\\Users\\aniru\\AppData\\Local\\Programs\\Python\\Python313\\python.exe';
 
 
 /*export const register = async (req, res) => {
@@ -337,7 +342,7 @@ export const updateProfile = async (req, res) => {
   const scriptPath = path.normalize(path.join(process.cwd(), 'ml', 'extract_resume.py'));
   console.log('Calling resume extractor at', scriptPath);
 
-  const py = spawn('python', [scriptPath, tmpPath], { stdio: ['ignore', 'pipe', 'pipe'] });
+  const py = spawn(PYTHON_EXECUTABLE, [scriptPath, tmpPath], { stdio: ['ignore', 'pipe', 'pipe'] });
 
         let out = '';
         let err = '';
@@ -352,26 +357,100 @@ export const updateProfile = async (req, res) => {
               // Save extracted text to profile
               user.profile.resumeText = parsed.text;
 
-              // Basic skill extraction from a small builtin list
-              const knownSkills = [
-                'python','java','javascript','react','node','django','flask','sql','mongodb','aws','azure','docker','kubernetes','machine learning','data science','c++','c#','php','html','css','typescript','tensorflow','pytorch','excel','git','rest','graphql'
-              ];
+              // Use Spacy-based skill extraction for production-grade NLP
+              console.log('Calling Spacy skill extractor for advanced skill detection...');
+              const spacyExtractorPath = path.normalize(path.join(process.cwd(), 'ml', 'spacy_skill_extractor.py'));
+              
+              // Prepare input for Spacy extractor
+              const spacyInput = JSON.stringify({
+                id: user._id.toString(),
+                text: parsed.text
+              });
 
-              const lowered = parsed.text.toLowerCase();
-              const found = new Set();
-              for (const s of knownSkills) {
-                const key = s.toLowerCase();
-                // simple contains check; word boundary for single words
-                if (key.includes(' ')) {
-                  if (lowered.includes(key)) found.add(s);
-                } else {
-                  const re = new RegExp('\\b' + key.replace(/[-/\\^$*+?.()|[\]{}]/g, '\\$&') + '\\b', 'i');
-                  if (re.test(parsed.text)) found.add(s);
+              const spacyPy = spawn(PYTHON_EXECUTABLE, [spacyExtractorPath], { stdio: ['pipe', 'pipe', 'pipe'] });
+              let spacyOut = '';
+              let spacyErr = '';
+              
+              spacyPy.stdin.write(spacyInput + '\n');
+              spacyPy.stdin.end();
+              
+              spacyPy.stdout.on('data', (d) => { spacyOut += d.toString(); });
+              spacyPy.stderr.on('data', (d) => { spacyErr += d.toString(); });
+
+              const spacyExitCode = await new Promise((resolve) => spacyPy.on('close', resolve));
+
+              let skillList = [];
+              let extractorUsed = 'rule-v1'; // fallback
+              
+              if (spacyExitCode === 0) {
+                try {
+                  const spacyResult = JSON.parse(spacyOut.trim());
+                  skillList = spacyResult.predicted || [];
+                  extractorUsed = 'spacy-v1';
+                  console.log(`✓ Spacy extracted ${skillList.length} skills using NLP analysis`);
+                } catch (e) {
+                  console.warn('Spacy result parsing failed, falling back to rule-based extractor:', e.message);
+                  // Fallback to simple rule-based extraction
+                  const knownSkills = [
+                    'python','java','javascript','react','node','django','flask','sql','mongodb','aws','azure','docker','kubernetes','machine learning','data science','c++','c#','php','html','css','typescript','tensorflow','pytorch','excel','git','rest','graphql'
+                  ];
+                  const lowered = parsed.text.toLowerCase();
+                  const found = new Set();
+                  for (const s of knownSkills) {
+                    const key = s.toLowerCase();
+                    if (key.includes(' ')) {
+                      if (lowered.includes(key)) found.add(s);
+                    } else {
+                      const re = new RegExp('\\b' + key.replace(/[-/\\^$*+?.()|[\]{}]/g, '\\$&') + '\\b', 'i');
+                      if (re.test(parsed.text)) found.add(s);
+                    }
+                  }
+                  skillList = Array.from(found);
                 }
+              } else {
+                console.warn('Spacy extractor failed:', spacyErr);
+                // Fallback to rule-based extraction
+                const knownSkills = [
+                  'python','java','javascript','react','node','django','flask','sql','mongodb','aws','azure','docker','kubernetes','machine learning','data science','c++','c#','php','html','css','typescript','tensorflow','pytorch','excel','git','rest','graphql'
+                ];
+                const lowered = parsed.text.toLowerCase();
+                const found = new Set();
+                for (const s of knownSkills) {
+                  const key = s.toLowerCase();
+                  if (key.includes(' ')) {
+                    if (lowered.includes(key)) found.add(s);
+                  } else {
+                    const re = new RegExp('\\b' + key.replace(/[-/\\^$*+?.()|[\]{}]/g, '\\$&') + '\\b', 'i');
+                    if (re.test(parsed.text)) found.add(s);
+                  }
+                }
+                skillList = Array.from(found);
               }
 
-              if (found.size > 0) {
-                const skillList = Array.from(found);
+              if (skillList.length > 0) {
+                // Create a ResumeAnalysis record to store predicted skills and text
+                try {
+                  // compute metrics against any existing profile.skills (if present) so we can log immediate accuracy
+                  const existingSkills = Array.isArray(user.profile?.skills) ? user.profile.skills : [];
+                  const metrics = computeSkillMetrics(existingSkills, skillList);
+
+                  const analysis = await ResumeAnalysis.create({
+                    user: user._id,
+                    resumeUrl: cloudResponse?.secure_url,
+                    resumeOriginalName: file.originalname,
+                    extractor: extractorUsed,
+                    predicted: skillList,
+                    resumeText: parsed.text,
+                    metrics
+                  });
+                  // attach latest analysis id for client to reference
+                  user.profile.lastResumeAnalysis = analysis._id;
+
+                  // Log metrics to server terminal for immediate visibility
+                  console.log(`✓ ResumeAnalysis for user=${user._id} analysis=${analysis._id} extractor=${extractorUsed} — TP=${metrics.TP} FP=${metrics.FP} FN=${metrics.FN} precision=${(metrics.precision*100).toFixed(1)}% recall=${(metrics.recall*100).toFixed(1)}% f1=${(metrics.f1*100).toFixed(1)}% jaccard=${(metrics.jaccard*100).toFixed(1)}%`);
+                } catch (e) {
+                  console.warn('Failed to create ResumeAnalysis record:', e.message || e);
+                }
                 // merge with any existing skills provided in request
                 const existing = Array.isArray(user.profile?.skills) ? user.profile.skills : [];
                 const merged = Array.from(new Set([...existing, ...skillList]));
@@ -430,6 +509,55 @@ export const updateProfile = async (req, res) => {
       message: "Something went wrong",
       success: false
     });
+  }
+};
+
+export const confirmSkills = async (req, res) => {
+  try {
+    const userId = req.user._id;
+    const { analysisId, confirmed } = req.body;
+
+    if (!Array.isArray(confirmed)) {
+      return res.status(400).json({ message: 'confirmed must be an array of skills', success: false });
+    }
+
+    let analysis = null;
+    if (analysisId) {
+      analysis = await ResumeAnalysis.findById(analysisId);
+    } else {
+      // fallback: get latest analysis for this user
+      analysis = await ResumeAnalysis.findOne({ user: userId }).sort({ createdAt: -1 });
+    }
+
+    if (!analysis) {
+      return res.status(404).json({ message: 'No resume analysis found', success: false });
+    }
+
+    analysis.confirmed = confirmed;
+    const metrics = computeSkillMetrics(confirmed, analysis.predicted || []);
+    analysis.metrics = metrics;
+    await analysis.save();
+
+    // Log metrics to server terminal so admins/developers see accuracy on confirmation
+    console.log(`ResumeAnalysis confirmed for user=${analysis.user} analysis=${analysis._id} — TP=${metrics.TP} FP=${metrics.FP} FN=${metrics.FN} precision=${(metrics.precision*100).toFixed(1)}% recall=${(metrics.recall*100).toFixed(1)}% f1=${(metrics.f1*100).toFixed(1)}% jaccard=${(metrics.jaccard*100).toFixed(1)}%`);
+
+    return res.status(200).json({ message: 'Skills confirmed and evaluated', success: true, metrics, analysisId: analysis._id });
+  } catch (error) {
+    console.error('confirmSkills error:', error);
+    return res.status(500).json({ message: 'Internal server error', success: false });
+  }
+};
+
+export const getResumeAnalysis = async (req, res) => {
+  try {
+    const id = req.params.id;
+    if (!id) return res.status(400).json({ message: 'analysis id required', success: false });
+    const analysis = await ResumeAnalysis.findById(id);
+    if (!analysis) return res.status(404).json({ message: 'analysis not found', success: false });
+    return res.status(200).json({ success: true, analysis });
+  } catch (error) {
+    console.error('getResumeAnalysis error:', error);
+    return res.status(500).json({ message: 'Internal server error', success: false });
   }
 };
 
@@ -520,4 +648,114 @@ export const updateProfile = async (req, res) => {
 };*/
 
 
+/**
+ * Extract skills from resume text using Spacy NLP
+ * Called when user wants to re-extract skills or use advanced NLP
+ */
+export const extractResumeSkills = async (req, res) => {
+  try {
+    const userId = req.user._id;
+    const { resumeText } = req.body;
 
+    if (!resumeText || typeof resumeText !== 'string' || resumeText.trim().length === 0) {
+      return res.status(400).json({
+        message: 'Resume text is required',
+        success: false
+      });
+    }
+
+    // Get user to verify ownership
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({
+        message: 'User not found',
+        success: false
+      });
+    }
+
+    console.log(`Extracting skills for user ${userId} using Spacy NLP...`);
+
+    // Call Spacy skill extractor
+    const spacyExtractorPath = path.normalize(path.join(process.cwd(), 'ml', 'spacy_skill_extractor.py'));
+    
+    const spacyInput = JSON.stringify({
+      id: userId.toString(),
+      text: resumeText
+    });
+
+    const spacyPy = spawn('python', [spacyExtractorPath], { stdio: ['pipe', 'pipe', 'pipe'] });
+    let spacyOut = '';
+    let spacyErr = '';
+    
+    spacyPy.stdin.write(spacyInput + '\n');
+    spacyPy.stdin.end();
+    
+    spacyPy.stdout.on('data', (d) => { spacyOut += d.toString(); });
+    spacyPy.stderr.on('data', (d) => { spacyErr += d.toString(); });
+
+    const spacyExitCode = await new Promise((resolve) => spacyPy.on('close', resolve));
+
+    if (spacyExitCode !== 0) {
+      console.error('Spacy extraction failed:', spacyErr);
+      return res.status(500).json({
+        message: 'Failed to extract skills using NLP',
+        success: false,
+        error: spacyErr
+      });
+    }
+
+    try {
+      const spacyResult = JSON.parse(spacyOut.trim());
+      const skillList = spacyResult.predicted || [];
+      const entities = spacyResult.entities || {};
+      const confidence = spacyResult.confidence || 0;
+
+      // Create ResumeAnalysis record
+      const existingSkills = Array.isArray(user.profile?.skills) ? user.profile.skills : [];
+      const metrics = computeSkillMetrics(existingSkills, skillList);
+
+      const analysis = await ResumeAnalysis.create({
+        user: userId,
+        resumeText: resumeText,
+        resumeOriginalName: 'manual-extraction',
+        extractor: 'spacy-v1',
+        predicted: skillList,
+        metrics
+      });
+
+      console.log(`✓ Spacy skill extraction: ${skillList.length} skills detected (confidence: ${confidence.toFixed(2)})`);
+
+      return res.status(200).json({
+        message: 'Skills extracted successfully using Spacy NLP',
+        success: true,
+        data: {
+          analysisId: analysis._id,
+          skills: skillList,
+          entities: entities,
+          confidence: confidence,
+          metrics: {
+            precision: (metrics.precision * 100).toFixed(1),
+            recall: (metrics.recall * 100).toFixed(1),
+            f1: (metrics.f1 * 100).toFixed(1),
+            jaccard: (metrics.jaccard * 100).toFixed(1)
+          }
+        }
+      });
+    } catch (e) {
+      console.error('Failed to parse Spacy output:', e.message);
+      return res.status(500).json({
+        message: 'Failed to parse skill extraction result',
+        success: false,
+        error: e.message
+      });
+    }
+
+  } catch (error) {
+    console.error('extractResumeSkills error:', error);
+    return res.status(500).json({
+      message: 'Internal server error',
+      success: false,
+      error: error.message
+    });
+  }
+};
