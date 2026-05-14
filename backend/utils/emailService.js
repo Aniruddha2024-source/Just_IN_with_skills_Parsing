@@ -6,6 +6,14 @@ dotenv.config();
 // Check if email configuration is available
 const isEmailConfigured = process.env.EMAIL_USER && process.env.EMAIL_PASS;
 
+console.log("=== EMAIL SERVICE DEBUG ===");
+console.log("EMAIL_HOST:", process.env.EMAIL_HOST ? "✅ Set" : "❌ Missing");
+console.log("EMAIL_PORT:", process.env.EMAIL_PORT ? "✅ Set" : "❌ Missing");
+console.log("EMAIL_USER:", process.env.EMAIL_USER ? "✅ Set" : "❌ Missing");
+console.log("EMAIL_PASS:", process.env.EMAIL_PASS ? "✅ Set (hidden)" : "❌ Missing");
+console.log("EMAIL_SECURE:", process.env.EMAIL_SECURE ? process.env.EMAIL_SECURE : "❌ Missing (default: false)");
+console.log("isEmailConfigured:", isEmailConfigured);
+
 // Create a transporter object only if email is configured
 let transporter = null;
 
@@ -13,6 +21,11 @@ if (isEmailConfigured) {
   try {
     const emailPort = parseInt(process.env.EMAIL_PORT || '587', 10);
     const emailSecure = process.env.EMAIL_SECURE === 'true' || emailPort === 465;
+    
+    console.log("Creating transporter with:");
+    console.log("  Host:", process.env.EMAIL_HOST || 'smtp.gmail.com');
+    console.log("  Port:", emailPort);
+    console.log("  Secure:", emailSecure);
     
     transporter = nodemailer.createTransport({
       host: process.env.EMAIL_HOST || 'smtp.gmail.com',
@@ -44,6 +57,7 @@ if (isEmailConfigured) {
   }
 } else {
   console.log('⚠️ Email configuration not found (missing EMAIL_USER or EMAIL_PASS). Email functionality will be disabled.');
+  console.log('Please set EMAIL_USER and EMAIL_PASS environment variables on Railway Dashboard');
 }
 
 /**
@@ -85,6 +99,9 @@ export const sendJobRecommendationEmail = async (to, subject, matchingJobs, user
     }
 
     const frontendURL = process.env.FRONTEND_URL || 'http://localhost:5173';
+    
+    console.log(`📧 Preparing email for ${to} with ${matchingJobs.length} jobs`);
+    console.log(`   Frontend URL: ${frontendURL}`);
     
     // Create HTML content for the email
     const htmlContent = `
@@ -135,6 +152,8 @@ export const sendJobRecommendationEmail = async (to, subject, matchingJobs, user
 
     // Send mail with defined transport object
     console.log(`📧 Attempting to send email to ${to} with subject: "${subject}"`);
+    console.log(`   From: ${process.env.EMAIL_USER}`);
+    
     const info = await transporter.sendMail({
       from: `"Job Portal" <${process.env.EMAIL_USER}>`,
       to,
@@ -142,10 +161,14 @@ export const sendJobRecommendationEmail = async (to, subject, matchingJobs, user
       html: htmlContent,
     });
 
-    console.log(`✅ Email sent to ${to}: ${info.messageId}`);
+    console.log(`✅ Email sent successfully!`);
+    console.log(`   Message ID: ${info.messageId}`);
+    console.log(`   To: ${to}`);
     return { success: true, messageId: info.messageId };
   } catch (error) {
     console.error('❌ Error sending email:', error.message);
+    console.error('   Error code:', error.code);
+    console.error('   Error details:', error);
     // Return error object instead of throwing to prevent crashes
     return { 
       error: error.message, 
