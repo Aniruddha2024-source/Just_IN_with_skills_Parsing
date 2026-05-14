@@ -10,7 +10,8 @@ git push origin main
 ```
 
 ### Step 2: Deploy on Railway (Monorepo Setup)
-1. Go to [railway.app](https://railway.app)
+1. Go to [railway.app](
+)
 2. Sign up with GitHub
 3. Click "New Project"
 4. Select "Deploy from GitHub repo"

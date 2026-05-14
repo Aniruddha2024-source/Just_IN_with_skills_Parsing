@@ -244,12 +244,15 @@ export const login = async (req, res) => {
     };
 
     // Step 7: Set cookie and return response
+    // For cross-origin requests (Vercel frontend with Railway backend), use SameSite=None with Secure
+    const isProduction = process.env.NODE_ENV === 'production' || process.env.FRONTEND_URL?.includes('vercel.app');
+    
     return res.status(200)
       .cookie("token", token, {
         maxAge: 1 * 24 * 60 * 60 * 1000,     // 1 day
-        httpOnly: true,                 // ✅ fix typo (was httpsOnly)
-        sameSite: 'strict',             // ✅ prevents CSRF in dev
-        secure: false                   // ❗️set to true in production (HTTPS)
+        httpOnly: true,                       // Prevents JavaScript access
+        sameSite: isProduction ? 'none' : 'lax',  // 'none' for cross-origin, 'lax' for local dev
+        secure: isProduction ? true : false   // 'true' for production (HTTPS), 'false' for local dev
       })
       .json({
         message: `Welcome back ${user.fullname}`,
