@@ -247,6 +247,16 @@ export const login = async (req, res) => {
     // For cross-origin requests (Vercel frontend with Railway backend), use SameSite=None with Secure
     const isProduction = process.env.NODE_ENV === 'production' || process.env.FRONTEND_URL?.includes('vercel.app');
     
+    console.log("=== LOGIN COOKIE DEBUG ===");
+    console.log("NODE_ENV:", process.env.NODE_ENV);
+    console.log("FRONTEND_URL:", process.env.FRONTEND_URL);
+    console.log("isProduction:", isProduction);
+    console.log("Cookie settings:", {
+      sameSite: isProduction ? 'none' : 'lax',
+      secure: isProduction ? true : false,
+      httpOnly: true
+    });
+    
     return res.status(200)
       .cookie("token", token, {
         maxAge: 1 * 24 * 60 * 60 * 1000,     // 1 day
