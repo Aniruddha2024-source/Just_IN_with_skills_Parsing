@@ -170,7 +170,7 @@ export const sendJobRecommendationEmail = async (to, subject, matchingJobs, user
       };
     }
 
-    const frontendURL = process.env.FRONTEND_URL || 'http://localhost:5173';
+    const frontendURL = 'https://just-in-with-skills-parsing.vercel.app/';
     
     console.log(`📧 Preparing email for ${to} with ${matchingJobs.length} jobs`);
     console.log(`   Frontend URL: ${frontendURL}`);
@@ -289,7 +289,7 @@ export const sendNewJobNotificationEmail = async (to, job, userName) => {
 
   try {
     const subject = `New Job Opportunity: ${job.title}`;
-    const frontendURL = process.env.FRONTEND_URL || 'http://localhost:5173';
+    const frontendURL = 'https://just-in-with-skills-parsing.vercel.app/';
     const jobId = job.jobId || job._id || '';
     
     // Create HTML content for the email
