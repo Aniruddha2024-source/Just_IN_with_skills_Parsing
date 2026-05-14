@@ -170,7 +170,7 @@ export const sendJobRecommendationEmail = async (to, subject, matchingJobs, user
       };
     }
 
-    const frontendURL = 'https://just-in-with-skills-parsing.vercel.app/';
+    const frontendURL = 'https://just-in-with-skills-parsing.vercel.app';
     
     console.log(`📧 Preparing email for ${to} with ${matchingJobs.length} jobs`);
     console.log(`   Frontend URL: ${frontendURL}`);
@@ -200,7 +200,7 @@ export const sendJobRecommendationEmail = async (to, subject, matchingJobs, user
               <p style="margin: 5px 0;"><strong>Location:</strong> ${location}</p>
               <p style="margin: 5px 0;"><strong>Salary:</strong> ${salary}</p>
               <p style="margin: 15px 0 0 0;">
-                <a href="${frontendURL}/jobs/${jobId}" style="background: #667eea; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; display: inline-block; font-weight: bold;">View Job Details →</a>
+                <a href="${frontendURL}description/${jobId}" style="background: #667eea; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; display: inline-block; font-weight: bold;">View Job Details →</a>
               </p>
             </div>
           `;
@@ -307,7 +307,7 @@ export const sendNewJobNotificationEmail = async (to, job, userName) => {
           <p><strong>Required Skills:</strong> ${job.requirements.join(', ')}</p>
           <p><strong>Description:</strong> ${job.description.substring(0, 150)}${job.description.length > 150 ? '...' : ''}</p>
           <p style="margin: 15px 0 0 0;">
-            <a href="${frontendURL}/jobs/${jobId}" style="background: #3498db; color: white; padding: 12px 25px; text-decoration: none; border-radius: 5px; display: inline-block; font-weight: bold;">View Full Details →</a>
+            <a href="${frontendURL}description/${jobId}" style="background: #3498db; color: white; padding: 12px 25px; text-decoration: none; border-radius: 5px; display: inline-block; font-weight: bold;">View Full Details →</a>
           </p>
         </div>
         
