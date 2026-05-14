@@ -1,0 +1,21 @@
+{
+  "$schema": "https://railway.app/railway.schema.json",
+  "services": {
+    "backend": {
+      "path": "./backend",
+      "buildCommand": "npm install",
+      "startCommand": "npm start",
+      "variables": {
+        "NODE_ENV": "production"
+      }
+    },
+    "frontend": {
+      "path": "./frontend",
+      "buildCommand": "npm install && npm run build",
+      "startCommand": "npm run preview",
+      "variables": {
+        "NODE_ENV": "production"
+      }
+    }
+  }
+}
